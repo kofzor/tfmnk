@@ -6,11 +6,11 @@
 <!-- <script type="text/javascript" src="tabulator.min.js"></script> -->
 <link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
 <script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
-<link rel="stylesheet" href="bootstrap.min.css">
-<script src="jquery.min.js"></script>
-<script src="jquery-ui.min.js"></script> <!-- dialogs -->
-<link rel="stylesheet" href="jquery-ui.css" />
-<script src="bootstrap.min.js"></script>
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<script src="js/jquery.min.js"></script>
+<script src="js/jquery-ui.min.js"></script> <!-- dialogs -->
+<link rel="stylesheet" href="css/jquery-ui.css" />
+<script src="js/bootstrap.min.js"></script>
 </head>
 <body>
 
@@ -135,8 +135,8 @@ var playerTable = new Tabulator("#player-table", {
 	ajaxURL:"playerData Leon20230611.json",
 	addRowPos:"top",
 	downloadRowRange:"all",
-	//persistenceID:"playertable1",
-	//persistence: true,
+	persistenceID:"playertable1",
+	persistence: true,
 	//reactiveData:true,
 	history:true,
 	selectable:true,
@@ -213,8 +213,8 @@ var matchTable = new Tabulator("#match-table", {
 	reactiveData:true,
 	history:true,
 	downloadRowRange:"all",
-	//persistenceID:"matchtable1",
-	//persistence: true,
+	persistenceID:"matchtable1",
+	persistence: true,
 	selectable: true, // ok for admin, remove for users
 	groupUpdateOnCellEdit:true,
 	groupBy:["round","table"],
@@ -337,8 +337,8 @@ var scoreTable = new Tabulator("#score-table", {
 	layout:"fitColumns",
     columns:[
 		{formatter:"rownum", title:"Sort", width:40},
-		{title:"ID", field:"id", width:50, visible:false, download:true},
-    {title:"Player", field:"player", width:180, resizable:false},
+		{title:"ID", field:"id", width:50, download:true},
+		{title:"Player", field:"player", width:180, resizable:false},
 		{title:"Total", field:"total", resizable:false,
 			columns:[{title:"Rank", field:"rank", width:60, resizable:false, validator:"integer", sorter:"number"},
 					{title:"TPs", width:60, field:"total_tps", headerSort:false, validator:"integer"}, {title:"Skill", width:80, field:"skill", validator:"numeric", sorter:"number"},{title:"VP", width:60, field:"total_vp", validator:"integer", sorter:"number"}]
