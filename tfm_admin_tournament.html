@@ -1,0 +1,991 @@
+<html>
+<head>
+<title>TFM Tournament</title>
+<!--<link href="https://unpkg.com/tabulator-tables@4.2.3/dist/css/tabulator.min.css" rel="stylesheet">-->
+<!--<link href="tabulator_simple.css" rel="stylesheet">-->
+<!-- <script type="text/javascript" src="tabulator.min.js"></script> -->
+<link href="https://unpkg.com/tabulator-tables/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables/dist/js/tabulator.min.js"></script>
+<link rel="stylesheet" href="bootstrap.min.css">
+<script src="jquery.min.js"></script>
+<script src="jquery-ui.min.js"></script> <!-- dialogs -->
+<link rel="stylesheet" href="jquery-ui.css" />
+<script src="bootstrap.min.js"></script>
+</head>
+<body>
+
+
+<ul id="tabPane" role="tablist" class="nav nav-tabs">
+	<li class="nav-item active"><a data-toggle="tab" href="#playerTabPane" role="tab" class="nav-link active playerTab">Player</a></li>
+	<li class="nav-item"><a data-toggle="tab" href="#matchTabPane" role="tab" class="nav-link matchTab">Match</a></li>
+	<li class="nav-item"><a data-toggle="tab" href="#scoreTabPane" role="tab" class="nav-link scoreTab">Score</a></li>
+	<li class="nav-item"><a data-toggle="tab" href="#corpTabPane" role="tab" class="nav-link corpTab">Corps</a></li>
+	<!--<li class="nav-item"><a data-toggle="tab" href="#raffleTabPane" role="tab" class="nav-link raffleTab">Raffle</a></li>-->
+	<li class="nav-item"><a data-toggle="tab" href="#helpTabPane" role="tab" class="nav-link helpTab">Help</a></li>
+</ul>
+
+</br>
+
+<div class="tab-content">
+	<div role="tabpanel" id="playerTabPane" class="tab-pane active">
+		<div class="table-controls">
+		<button id="player-history-undo">Undo Edit</button>
+		<button id="player-history-redo">Redo Edit</button>
+		<button id="player-add">Add Player</button>
+		<button id="player-del">Remove Player</button>
+		<button id="download-player-json">Download JSON</button>
+		<button id="load-player-json">Load JSON</button>
+		<button id="player-check">Check Player</button>
+		</div>
+		</br>
+		<div id="player_count">Total Players:</div> <!-- includes inactive players -->
+		<div id="active_count">Active Players:</div> <!-- includes inactive players -->
+		</br>
+		<div id="player-table"></div>
+	</div>
+
+	<div role="tabpanel" id="matchTabPane" class="tab-pane">
+		At round: <div id="round-indicator" style="display: inline-block"></div>
+		<div class="table-controls">
+			<button id="start-new-round">Start New Round</button>
+		</div>
+		</br>
+		<div class="table-controls">
+			<button id="history-undo">Undo Edit</button>
+			<button id="history-redo">Redo Edit</button>
+			<button id="add-match-row">Add Row</button>
+			<button id="del-match-row">Delete Rows</button>
+			<!--<button id="download-match-csv">Download CSV</button>-->
+			<button id="download-match-json">Download JSON</button>
+			<button id="load-match-json">Load JSON</button>
+			<span id="history-msg" style="margin-left:10px; font-weight:bold;"></span>
+		</div>
+		</br>
+		<div id="match-table"></div>
+	</div>
+
+	<div role="tabpanel" id="scoreTabPane" class="tab-pane">
+		<div class="table-controls">
+			<button id="compute-score">Calculate Scores & Rank</button>
+			<button id="download-score-json">Download JSON</button>
+			<button id="Lottery">Lottery</button>
+			<!--<button id="download-score-pdf">Export PDF</button> WIP -->
+		</div>
+		</br>
+		<div id="score-table"></div>
+	</div>
+
+	<div role="tabpanel" id="corpTabPane" class="tab-pane">
+		<div class="table-controls">
+			<button id="compute-corp">Calculate Scores & Rank</button>
+			<button id="download-corp-json">Download JSON</button>
+		</div>
+		</br>
+		<div id="corp-table"></div>
+	</div>
+
+	<div role="tabpanel" id="helpTabPane" class="tab-pane">
+		</br>
+		<ul>
+		<li><h3>Player leaves tournament</h3></li>
+		<p>Go to Player tab, find the player and turn off present so that a red cross (X) shows. If the player was already at a table then change the table number and fill a 4 in Rank.</p>
+		<li><h3>Player is late to the tournament</h3></li>
+		<p>Go to Player tab, and make sure that the player is present (green). Then, on the Match tab, click on Start New Round. It will detect a missing player and at the bottom rows are added for this player. If the player participated at a table then fill in his/her table as well as scores. If the player did not enter any table for a round, then fill in a table number that is not existing (e.g. 40) and fill in a score of 0.</p>
+		<li><h3>Player joined wrong table</h3></li>
+		<p>Look up the player in the Match table, change his/her Table number to the table he/she joined and check who took his/her spot at the original table.</p>
+		<li><h3>Player has wrong VP or Rank</h3></li>
+		<p>Look up the player in the Match table, change his/her VP and Rank to the correct one. Then in the Score tab, click on Calculate Score & Rank. In future rounds the updated score is used.</p>
+		<li><h3>Warning: Who is better?</h3></li>
+		<p>Look up the players mentioned in the Match table, change their VP and Rank to the correct one. Then in the Score tab, click on Calculate Score & Rank. In future rounds the updated score is used.</p>
+		<li><h3>Warning: Not all scores are entered</h3></li>
+		<p>Make sure all VPs (and if necessary, then also ranks) are entered before hitting the start new round.</p>
+		<li><h3>What is ...?</h3></li>
+		<p>VP = Victory Points, the final points in a match. Pts = Match points, 3, 2, 1 or 0 points are awarded based on the rank in the game. Rank is first, second, third or fourth place within a match, being first is best.</p>
+		<li><h3>Player matched to the same opponent</h3></li>
+		<p>There is a slight but unfortunate chance that a player is matched to the same opponent twice.</p>
+		<li><h3>What is button ...?</h3></li>
+		<p>Add Player / Remove Player are obvious. Undo edit makes you undo the latest edit. Redo edit redoes the edit after you first did undo edit. Download csv evidently downloads the table. Calculate scores & rank rebuilds the scoring table from scratch, including the tournament sorting.</p>
+		</ul>
+	</div>
+</div>
+
+
+</body>
+<script type="text/javascript">
+
+// TOURNAMENT Setup
+var rank_scores = [3,3,2,1,0,0,0,0]; // corresponding to rank 1,2,3,4,5,6 (in case that somehow 5th/6th player happened to join the same table. Starts from rank 1 so skip first value
+
+// PLAYER SETUP
+//var init_players_tournament = [{"player":"Alper Soylemez","paid":true},{"player":"Arnaud van der Ploeg","paid":true},{"player":"Arnold van der Veen","paid":true},{"player":"Bart Schelfaut","paid":true},{"player":"Bas Meijerman","paid":true},{"player":"Ben Haanstra","paid":true},{"player":"Binne Heida","paid":true},{"player":"Camilla Dos Santos","paid":true},{"player":"Chris van der Velden","paid":true},{"player":"Christoph Janietz"},{"player":"Daniel Swaab","paid":true},{"player":"Diewertje Eitjes","paid":true},{"player":"Dwayne Holmes","paid":true},{"player":"Erik Roelofs","paid":true}];
+// //,{"player":"Erina Daberdini","paid":true},{"player":"Eva van der Weerd","paid":true},{"player":"Floris van der Veen","paid":true},{"player":"Floyd van den Nieuwenhof","paid":true},{"player":"Frank de Jong","paid":true},{"player":"Gian Franco Casula","paid":true},{"player":"Hans Heijne Makkreel","paid":true},{"player":"Harm Derks","paid":true},{"player":"Henderikus de Jong","paid":true},{"player":"Hugo Ward","paid":true},{"player":"Hristo Georgiev","paid":true},{"player":"Jacqueline Zuidema","paid":true},{"player":"Janis Bader","paid":true},{"player":"Jelle Lauwers","paid":true},{"player":"Jennifer Brouwer","paid":true},{"player":"Jeroen Geenen","paid":true},{"player":"Johnny van Doorn","paid":true},{"player":"Joris Paardekoper","paid":true},{"player":"Jos Hoefnagel","paid":true},{"player":"Jurek Bader","paid":true},{"player":"Kim van Kruijsbergen","paid":true},{"player":"Kyriakos Avgoustis","paid":true},{"player":"Lars Scheepers","paid":true},{"player":"Lindsey Wray","paid":true},{"player":"Marcel Wapstra","paid":true},{"player":"Marco Marsili","paid":true},{"player":"Margriet Benning","paid":true},{"player":"Marije Kraaijeveld","paid":true},{"player":"Marijn Lybeart","paid":true},{"player":"Marion Veldkamp","paid":true},{"player":"Mark Rood","paid":true},{"player":"Marleen de Bot","paid":true},{"player":"Marrick Huisma","paid":true},{"player":"Martin van der Heyden","paid":true},{"player":"Martin van Mersbergen","paid":true},{"player":"Melinda Schuurmans","paid":true},{"player":"Natasja Sluijk","paid":true},{"player":"Nathan Gotlib","paid":true},{"player":"Nico Geurts","paid":true},{"player":"Nina Henken","paid":true},{"player":"Olaf Weijers","paid":true},{"player":"Patrick Schluter","paid":true},{"player":"Paul Peek","paid":true},{"player":"Peter Havik","paid":true},{"player":"Peter Henken","paid":true},{"player":"Ralph Dambacher","paid":true},{"player":"Regina van Mersbergen","paid":true},{"player":"Rens Groenewoud","paid":true},{"player":"Rijk Groenewoud","paid":true},{"player":"Rome van Grinsven","paid":true},{"player":"Ronald Koopman","paid":true},{"player":"Ruud Cremers","paid":true},{"player":"Sake Blok","paid":true},{"player":"Simon Buijs","paid":true},{"player":"Steve Bruck","paid":true},{"player":"Steve Hatto","paid":true},{"player":"Susan Brommer","paid":true},{"player":"Tim Sauer","paid":true},{"player":"Tomas Jakubis","paid":true},{"player":"Tonatiuh Belderbos","paid":true},{"player":"Yvonne Dijkstra","paid":true},{"player":"Yoep Minnaard", "paid":true},{"player":"Zep Harrevelt","paid":true}]
+
+//BK20230225 var init_players_tournament = ["Tona Belderbos","Tim Kreuk","Arnaud van der Ploeg","Diewertje Eitjes","Nick van Staalduinen","Qing Li","Marina Kooistra","Floyd van den Nieuwenhof","Gian Franco Casula","Marco Marsili","Kris Vanhaverbeke","Laura Pinilla","Ben Haanstra","Wim Vanrie","Frank de Jong","Minh Tran","Manu Dremiere","Bas Meijerman","Élisabeth Mounier","Stijn Peeters","Brecht Demeyer","Pierre-André Zimmermann","Anne Isidor - Zimmerman","Paul van Eekelen","Geoffrey Milleville","Roussel Pierre François","Thomas Keerle","Nora Bourouis","Christophe Eloy","Dominique Simonis","Cedric Jamoul","Arnaud Dumont","Achraf Mahti","Céline Debeusscher","Robin Courtiat","Harold Toutain","Thomas Courgeau","Charlotte Belh","David Gregoire","Natacha Gregoir","Grégory Lavalle","William Turner","Melissa Delva","Leon star","Max van Mulken","Leo van Schooten","Liselot Wyffels","Bart Van Quathem","Robin Reynaert","Karel Pans","Laurens Van de Perre","Wolf Dehulster","Marijn Lybaert","Inez Wester","Camiel Maseland","Mart Hagedoorn","Stijn Van Goethen","Diederik van der Heijden","Wim Waelkens","Tine De Brabander","Dimi Rosselle","Sander De Canck","Thomas Laisnez","Toni Ikonen","Tatu Ikonen","Paul De Smet","Christophe Fockedey","Thomas Vigneron","Thomas vanhulle","Christophe Gregoir","Jelle Lauwers","Simon Declerck","Adriaan Kyndt","Evie Hoeijmakers","Koen De Raad"];
+//Leon Star 20230611
+var init_players_tournament = ['Leon','Olaf','Diederik'];
+
+var init_players = [];
+ for (i in init_players_tournament) {
+	//init_players.push({"id":parseInt(i), "player":init_players_tournament[i].player, "present":true, "paid":init_players_tournament[i].paid || false});
+	init_players.push({"id":parseInt(i), "player":init_players_tournament[i], "present":false, "paid":true});
+};
+var current_id = init_players.length;
+var playerTable = new Tabulator("#player-table", {
+	//data:init_players,
+	ajaxURL:"playerData Leon20230611.json",
+	addRowPos:"top",
+	downloadRowRange:"all",
+	//persistenceID:"playertable1",
+	//persistence: true,
+	//reactiveData:true,
+	history:true,
+	selectable:true,
+	layout:"fitDataFill",
+    columns:[
+		{title:"ID", field:"id", width:50, editor:true},
+		{title:"Player", field:"player", width:200, editor:"input"},
+		{title:"Present", field:"present", width:100, hozAlign:"center", formatter:"tickCross", editor:true},
+		{title:"Paid", field:"paid", width:100, hozAlign:"center", formatter:"tickCross", editor:true},
+		// {title:"Game", field:"game", width:100, editor:"input"},
+    ],
+});
+var current_playerid = playerTable.getData().length;
+// Retrieve the name of a player given an ID
+function retrievePlayer4ID(id) {
+	//console.log(id);
+	let playerData = playerTable.getData();
+	return playerData.find(function(el) { return el.id == id }).player;
+};
+// Retrieve list of active player IDs
+function getActivePlayers() {
+	return Array.from(playerTable.getData().filter(r => r.present == true), v => v["id"]);
+}
+function updatePlayerCounts() {
+	current_playerid = playerTable.getData().length;
+	$("#player_count").text('Total Players: '+current_playerid);
+	$("#active_count").text('Active Players: '+getActivePlayers().length);
+};
+//Add row on "Add Row" button click //can be improved by reopening the window message
+$("#player-add").click(function(){
+	var newplayer = prompt("Please enter a name", "");
+	if (newplayer != null) {
+		var playerList = Array.from(playerTable.getData(), v => v["player"]);
+		if ( !playerList.includes(newplayer) ) {
+			current_playerid++;
+			playerTable.addRow({"player":newplayer, "id":current_playerid});
+			updatePlayerCounts();
+		} else {
+			window.alert('Player already existing. Change name to differentiate players.');
+		};
+	};
+});
+//Delete row on "Delete Row" button click TURNED OFF AS PRECAUTION
+$("#player-del").click(function(){
+	var selectedRows = playerTable.getSelectedRows();
+	for(var i=0;i<selectedRows.length;i++) { selectedRows[i].delete(); }
+	updatePlayerCounts();
+});
+//Clear table on "Empty the table" button click
+$("#player-clear").click(function(){ playerTable.clearData(); });
+//undo button
+$("#player-history-undo").click(function(){ playerTable.undo(); });
+//redo button
+$("#player-history-redo").click(function(){ playerTable.redo(); });
+//trigger download of data.json file
+$("#download-player-json").click(function(){ playerTable.download("json", "playerData "+Date().toLocaleString().replace(/(:|GMT.*)/gm, '')+".json"); });
+//load json file
+$("#load-player-json").click(function(){ playerTable.import("json", ".json"); });
+$("#player-check").click(function(){
+	updatePlayerCounts();
+});
+
+// MATCH TAB
+//var matchData = [];
+var matchrowid = 0;
+var matchTable = new Tabulator("#match-table", {
+	index: "id",
+	//data:matchData,
+	//layout:"fitDataFill",
+    //height:"311px",
+	layout:"fitColumns",
+	//resizableColumns:false,
+	movableRows:true,
+	reactiveData:true,
+	history:true,
+	downloadRowRange:"all",
+	//persistenceID:"matchtable1",
+	//persistence: true,
+	selectable: true, // ok for admin, remove for users
+	groupUpdateOnCellEdit:true,
+	groupBy:["round","table"],
+	groupHeader:[
+		function(value, count, data){
+			return "Round " + value + "<span style='color:#333; margin-left:10px;'>(" + count + " total players)</span>";
+		},
+		function(value, count, data){
+			return "Table " + value + "<span style='color:#333; margin-left:10px;'>(" + count + "P)</span>";
+		}
+	],
+    columns:[
+		{rowHandle:true, formatter:"handle", headerSort:false, frozen:true, width:30, minWidth:30},
+		{title:"ID", field:"id", width:80, editor:"number", editorParams:{ min:0,max:999999,step:1}, validator:"integer"},
+		{title:"PlayerID", field:"playerid", width:80, editor:"number", editorParams:{ min:0,max:999,step:1}, validator:"integer"},
+		{title:"Player", field:"player", width:120, editor:true},
+		{title:"VP", field:"vp", width:100, editor:"number", editorParams:{ min:20,max:500,step:1}, validator:"integer", sorter:"number"},
+		{title:"Rank", field:"rank", width:100, editor:"number", editorParams:{ min:1,max:6,step:1}, validator:"integer", sorter:"number"},
+		{title:"Corp", field:"corp", width:90, formatter:"image", formatterParams:{
+			height:"30px",
+			width:"80px",
+			//urlPrefix:"www.artificialintelligence.works",
+			urlSuffix:".png"
+			},
+			editor:"list", editorParams:{values:{
+			"Unknown": "Unknown",
+				"Arcadian Communities": "Arcadian Communities",
+				"Aridor": "Aridor",
+				"Arklight": "Arklight",
+				"Astrodrill": "Astrodrill",
+				"BeginnerCorp": "Beginner Corp",
+				"Cheung Shing Mars": "Cheung Shing Mars",
+				"Credicor": "Credicor",
+				"Crowdsource": "Crowdsource",
+				"Dev Wright": "Dev Wright",
+				"Ecoline": "Ecoline",
+				"Earth First": "Earth First",
+				"Factorum": "Factorum",
+				"Helion": "Helion",
+				"Interplanetary Cinematics": "Interplanetary Cinematics",
+				"Inventrix": "Inventrix",
+				"Lakefront Resorts": "Lakefront Resorts",
+				"Manutech": "Manutech",
+				"Mining Guild": "Mining Guild",
+				"Mons Insurance": "Mons Insurance",
+				"Morning Star": "Morning Star",
+				"Pharmacy Union": "Pharmacy Union",
+				"Phobolog": "Phobolog",
+				"Philares": "Philares",
+				"Polyphemos": "Polyphemos",
+				"Point Luna": "Point Luna",
+				"Princess Ltd": "Princess Ltd",
+				"Pristar": "Pristar",
+				"Recyclon": "Recyclon",
+				"Robinson Industries": "Robinson Industries",
+				"Saturn Systems": "Saturn Systems",
+				"Space Penal Colony": "Space Penal Colony",
+				"Splice": "Splice",
+				"Teractor": "Teractor",
+				"Terra Labs": "Terra Labs",
+				"Tharsis Republic": "Tharsis Republic",
+				"Thorgate": "Thorgate",
+				"UNMI": "UNMI",
+				"Utopia": "Utopia",
+				"Valley Trust": "Valley Trust",
+				"Vitor": "Vitor",
+				"Viron": "Viron"
+			}}},
+			//formatter:function(cell, formatterParams){ var value = cell.getValue();},
+		{title:"Table", field:"table", width:80, editor:"number", editorParams:{ min:1,max:100,step:1}, validator:"integer", sorter:"number"},
+		{title:"Round", field:"round", width:80, editor:"number", editorParams:{ min:1,max:10,step:1}, validator:"integer", sorter:"number"},
+    ],
+});
+// add row
+$("#add-match-row").click(function(){
+  matchTable.addRow({"id":matchrowid});
+	matchrowid++;
+	matchTable.redraw();
+});
+// delete rows
+$("#del-match-row").click(function(){
+	//var selectedRows = matchTable.getSelectedRows(); // doesnt work anymore
+	//for(var i=0;i<selectedRows.length;i++) { selectedRows[i].delete(); }
+	//var selectedRows = Array.from(matchTable.getSelectedData(), v => v.id);
+	var selectedRows = matchTable.getSelectedRows();
+	for(var i=0;i<selectedRows.length;i++) { selectedRows[i].delete(); }
+
+	/*let selected = matchTable.getSelectedRows();
+	for (i in selected) { selected[i].delete(); };*/
+});
+/*
+document.getElementById("del-match-row").addEventListener("click", function(){
+    let selected = matchTable.getSelectedRows();
+    for (i in selected) { selected[i].delete(); };
+});
+*/
+//trigger download of data.json file
+$("button#download-match-json").click(function(){
+  //matchTable.download("json", "matchData "+Date().toLocaleString().replace(/.*\s(.* \d{2}:\d{2}:\d{2}).*/, "$1")+".json");
+	matchTable.download("json", "matchData "+Date().toLocaleString().replace(/(:|GMT.*)/gm, '')+".json");
+});
+//load json file
+$("button#load-match-json").click(function(){
+	matchTable.import("json", ".json");
+	matchTable.redraw();
+});
+//undo button
+$("button#history-undo").on("click", function(){ matchTable.undo(); });
+//redo button
+$("button#history-redo").on("click", function(){ matchTable.redo(); });
+
+
+// SCORE TAB
+var scoreTable = new Tabulator("#score-table", {
+	index:"id",
+	//layout:"fitDataFill",
+	//layout:"fitColumns",
+	//resizableColumns:false,
+	downloadRowRange:"all",
+	layout:"fitColumns",
+    columns:[
+		{formatter:"rownum", title:"Sort", width:40},
+		{title:"ID", field:"id", width:50, visible:false, download:true},
+    {title:"Player", field:"player", width:180, resizable:false},
+		{title:"Total", field:"total", resizable:false,
+			columns:[{title:"Rank", field:"rank", width:60, resizable:false, validator:"integer", sorter:"number"},
+					{title:"TPs", width:60, field:"total_tps", headerSort:false, validator:"integer"}, {title:"Skill", width:80, field:"skill", validator:"numeric", sorter:"number"},{title:"VP", width:60, field:"total_vp", validator:"integer", sorter:"number"}]
+		},
+		{title:"Round 1", field:"rnd1", resizable:false,
+			columns:[{title:"Table", width:50, field:"rnd1_table", headerSort:false}, {title:"VP", width:50, field:"rnd1_vp", headerSort:false},{title:"TP", width:50, field:"rnd1_pts", headerSort:false}, {title:"Corp", width:90, field:"rnd1_corp", headerSort:false, tooltip:true, formatter:"image", formatterParams:{
+			height:"30px",
+			width:"80px",
+			//urlPrefix:"www.artificialintelligence.works",
+			urlSuffix:".png"
+			},}]
+		},
+		{title:"Round 2", field:"rnd2", resizable:false,
+			columns:[{title:"Table", width:50, field:"rnd2_table", headerSort:false}, {title:"VP", width:50, field:"rnd2_vp", headerSort:false},{title:"TP", width:50, field:"rnd2_pts", headerSort:false}, {title:"Corp", width:90, field:"rnd2_corp", headerSort:false, tooltip:true, formatter:"image", formatterParams:{
+			height:"30px",
+			width:"80px",
+			//urlPrefix:"www.artificialintelligence.works",
+			urlSuffix:".png"
+			},}]
+		},
+		{title:"Round 3", field:"rnd3", resizable:false,
+			columns:[{title:"Table", width:50, field:"rnd3_table", headerSort:false}, {title:"VP", width:50, field:"rnd3_vp", headerSort:false},{title:"TP", width:50, field:"rnd3_pts", headerSort:false}, {title:"Corp", width:90, field:"rnd3_corp", headerSort:false, tooltip:true, formatter:"image", formatterParams:{
+			height:"30px",
+			width:"80px",
+			//urlPrefix:"www.artificialintelligence.works",
+			urlSuffix:".png"
+			},}]
+		}
+    ],
+});
+
+//trigger download of data.json file or pdf file
+$("button#download-score-json").click(function(){ scoreTable.download("json", "scoreData "+Date().toLocaleString().replace(/(:|GMT.*)/gm, '')+".json"); });
+
+// Update score table and re-rank
+$("button#compute-score").click(function(){ updateScoreTable(); });
+// Pick a random player from the list, prompt the player
+$("button#lottery").click(function(){
+	updateScoreTable(); // Make sure all rows are correct and ranked;
+	scoreTable.deselectRow(); // deselect all
+	let active_players = getActivePlayers();
+	shuffle(active_players);
+	for (pid of active_players) {
+		console.log('check winner', pid);
+		if (pid2Rank(pid) > 3) {
+			let winner = scoreTable.getData().filter(v => v.id == pid)[0];
+			scoreTable.selectRow(scoreTable.getRows().filter(row => row.getData().id == pid));
+			$("<div title='Winner!'><b>"+winner.rank+". "+winner.player+"</b></div>").dialog({position: 'center'});
+			break;
+		};
+	};
+});
+
+
+var corpTable = new Tabulator("#corp-table", {
+	index:"corp",
+	//layout:"fitDataFill",
+	//layout:"fitColumns",
+	//resizableColumns:false,
+	layout:"fitColumns",
+    columns:[
+		{formatter:"rownum", title:"Sort", width:40, headerSort:false},
+		{title:"Corp", width:100, field:"corp", tooltip:true, formatter:"image", formatterParams:{
+			height:"30px",
+			width:"80px",
+			//urlPrefix:"www.artificialintelligence.works",
+			urlSuffix:".png"
+			},
+		},
+		{title:"Stats", field:"stats", resizable:false,
+			columns:[{title:"AvgRank", width:100, field:"avg_rank"}, {title:"Skill", width:100, field:"corp_skill"}, {title:"Picked", width:100, field:"total_picked"}]
+		},
+		{title:"Picked", field:"picked", resizable:false,
+			columns:[{title:"R1", width:50, field:"rnd1_picked", headerSort:false}, {title:"R2", width:50, field:"rnd2_picked", headerSort:false}, {title:"R3", width:50, field:"rnd3_picked", headerSort:false}]
+		},
+		{title:"Rank", field:"rank", resizable:false,
+			columns:[{title:"1ST", width:50, field:"rank_1", headerSort:false}, {title:"2ND", width:50, field:"rank_2", headerSort:false}, {title:"3RD", width:50, field:"rank_3", headerSort:false}, {title:"4TH", width:50, field:"rank_4", headerSort:false}]
+		},
+    ],
+});
+$("button#download-corp-json").click(function(){
+  corpTable.download("json", "corpData "+Date().toLocaleString().replace(/(:|GMT.*)/gm, '')+".json");
+});
+$("button#compute-corp").click(function(){
+	updateCorpTable();
+	corpTable.setSort([{column:"corp_skill", dir:"desc"}]);
+	corpTable.redraw();
+});
+
+
+// CROSS LOGIC
+//Compute which round we are in, using the match data
+// 0 is pre-start, 1-3 are rounds, no >3 rounds (unless we want to change)
+function fncRound() {
+	let rnd = 0;
+	let matchData = matchTable.getData();
+	for (var i = 0; i < matchData.length; i++) { if (matchData[i]["round"] > rnd) { rnd = matchData[i]["round"]; }; }; // 0 refers to the round number from the string.
+	return parseInt(rnd);
+}
+
+// Shuffle function
+function shuffle(array) {
+  array.sort(() => Math.random() - 0.5);
+};
+
+// Table ranker in Match
+function tablerank(table_array) {
+	table_array.sort(function (r1, r2) {
+		// Sort by points
+		if (r1.vp > r2.vp) return -1;
+		if (r1.vp < r2.vp) return 1;
+
+		// In case of ties, use the rank
+		// Be wary of ties!
+		if (r1.rank === undefined || r1.rank === null || r2.rank === undefined || r2.rank === null || r1.rank == r2.rank) {
+			showedWarning = true;
+				matchTable.updateData([{id:r1.id,vp:'check vp+rank'}, {id:r2.id, vp:'check vp+rank'}]);
+			return; };
+		if (r1.rank < r2.rank) return -1;
+		if (r1.rank > r2.rank) return 1;
+	});
+	return table_array;
+};
+
+// Identify subgraphs
+function difference(setA, setB) {
+    var _difference = new Set(setA);
+    for (var elem of setB) {
+        _difference.delete(elem);
+    }
+    return _difference;
+};
+function union(setA, setB) {
+	return [...new Set([...setA, ...setB])];
+};
+function playersOnTable(rnd, table, data) {
+	return Array.from(data.filter(row => row.round == rnd && row.table == table), v=>v['playerid']);
+};
+function opponentsOfPlayer(pid, data) {
+	let playerRows = data.filter(row => row.playerid == pid);
+	let players = [];
+	for (let r of playerRows) {
+		players = players.concat(playersOnTable(r.round, r.table, data));
+	};
+	return Array.from(new Set(players));
+};
+function subgraphs(data) {
+	// Input is a dataset, allowing for the checking of assignment solutions
+	let result = []; // holds subgraphs
+	//let uniquePlayers = Array.from(new Set(Array.from(data, v=>v['playerid'])));
+	let uniquePlayers = union(Array.from(new Set(Array.from(data, v=>v['playerid']))), getActivePlayers()); // add players that were not in match table
+	while (uniquePlayers.length > 0) {
+		let current_player = uniquePlayers.pop();
+		let current_subgraph = new Set([current_player]);
+		let related = opponentsOfPlayer(current_player, data);
+		while (related.length > 0) {
+			// pop first related
+			check = related.pop();
+			// add to current_subgraph
+			current_subgraph = union(current_subgraph, [check]);
+			// delete from uniquePlayers
+			uniquePlayers = Array.from(difference(uniquePlayers, [check]));
+			// add opponents of this player to related if they are not yet in current_subgraph, and only those that have not already been in related
+			related = Array.from(union(related, difference(opponentsOfPlayer(check, data), current_subgraph)));
+		};
+		result.push(Array.from(current_subgraph));
+	};
+	return result;
+};
+
+
+// Value Iteration
+function value_iteration(s, skill_graph) {
+	// Initialize:
+	let skill_dict = {};
+	for (p of s) {
+		skill_dict[p] = 0;
+	};
+	// Value iteration
+	let its = 0;
+	let new_skill_dict = {};
+	do {
+		change = 0; // change this iteration
+		for (p of s) {
+			let new_skill = 0;
+			for (o in skill_graph[p]) { // for each opponent of the player
+				// Q(p) = avg(Diff[p,o]) + Q[o]  === Skill of player is average difference to other players + their skills
+				new_skill = new_skill + (skill_graph[p][o].reduce((a,b) => a+b, 0) / skill_graph[p][o].length) + skill_dict[o];
+			};
+			new_skill = new_skill / Object.keys(skill_graph[p]).length; // average across players
+			change += Math.abs(skill_dict[p] - new_skill); // keeping track off delta
+			new_skill_dict[p] = new_skill;
+		};
+		for (p of s) {
+			skill_dict[p] = new_skill_dict[p]; // update estimated skill values
+		};
+		its++; // increment iteration
+	} while (change > 1e-5 && its < 250); // repeat the do-while until change is tiny or more than 250 iterations (only happens with big tournaments)
+	console.log("Current Round", fncRound(), "Subgraph", s, "Iterations ", its, ", Change ", change);
+	return skill_dict;
+}
+
+//Update Score Table
+function updateScoreTable() {
+	let matchData = matchTable.getData();
+	// fill in all match points
+	let current_round = fncRound();
+	console.log("current rnd "+current_round);
+	let skill_graph = {}; // VI Skill, who seen who
+	let update_matchData = []; // Updates
+	for (i = current_round; i > 0; i--) { // Walk back in rounds
+		// Rank Tables and create skill_graph
+		let uniqueTables = Array.from(new Set(Array.from(matchData.filter(row => row.round == i), v=>v['table'])));
+		for (let table of uniqueTables) {
+			let foundRows = matchData.filter(row => row.round == i && row.table == table);
+			if (foundRows.length < 3) {
+				// If less than 3 players, then the ranking has to be entered manually for points
+				console.log(table, 'has less than 3 players');
+			} else {
+				foundRows = tablerank(foundRows);
+				for (let ri in foundRows) {
+					update_matchData.push({
+						id:foundRows[ri].id,
+						rank:parseInt(ri)+1
+					});
+				};
+			};
+
+			// Value Iteration differences
+			for (let p = 0; p < foundRows.length; p++) {
+				for (let o = 0; o < foundRows.length; o++) {
+					if (p!=o) {
+						if (skill_graph[foundRows[p].playerid]) {
+							if (skill_graph[foundRows[p].playerid][foundRows[o].playerid]) {
+								// if already a matchup, then add to the list
+								skill_graph[foundRows[p].playerid][foundRows[o].playerid].push(foundRows[p].vp - foundRows[o].vp);
+							} else {
+								// if no matchup yet then add
+								skill_graph[foundRows[p].playerid][foundRows[o].playerid] = [foundRows[p].vp - foundRows[o].vp];
+							};
+						} else {
+							// does not yet exist, therefore create
+							skill_graph[foundRows[p].playerid] = {};
+							skill_graph[foundRows[p].playerid][foundRows[o].playerid] = [foundRows[p].vp - foundRows[o].vp];
+							// doesnt work for some reason hence in two steps skill_graph[foundRows[p].playerid] = { foundRows[o].playerid : [foundRows[p].vp - foundRows[o].vp] };
+						};
+					};
+				};
+			};
+		};
+	};
+	matchTable.updateOrAddData(update_matchData);
+	update_matchData = [];
+
+	// Round VPs
+	matchData = matchTable.getData();
+	let update_scoreTable = [];
+	for (let row of matchData) {
+		let i_rnd = row['round'];
+		if (i_rnd == 1) {
+			update_scoreTable.push({
+				id:row.playerid,
+				player:row.player,
+				rnd1_table:parseInt(row.table),
+				rnd1_vp:parseInt(row.vp),
+				rnd1_pts:rank_scores[parseInt(row.rank)],
+				rnd1_corp:row.corp || "Unknown"
+			});
+		} else if (i_rnd == 2) {
+			update_scoreTable.push({
+				id:row.playerid,
+				player:row.player,
+				rnd2_table:parseInt(row.table),
+				rnd2_vp:parseInt(row.vp),
+				rnd2_pts:rank_scores[parseInt(row.rank)],
+				rnd2_corp:row.corp || "Unknown"
+			});
+		} else if (i_rnd == 3) {
+			update_scoreTable.push({
+				id:row.playerid,
+				player:row.player,
+				rnd3_table:parseInt(row.table),
+				rnd3_vp:parseInt(row.vp),
+				rnd3_pts:rank_scores[parseInt(row.rank)],
+				rnd3_corp:row.corp || "Unknown"
+			});
+		} else {
+			console.log('error in updating vps and table');
+		};
+	};
+	matchTable.redraw();
+	scoreTable.updateOrAddData(update_scoreTable);
+
+	// Total Points + Total VPs
+	let scoreData = scoreTable.getData();
+	update_scoreTable = [];
+	for (var i in scoreData) {
+		update_scoreTable.push({
+			id:scoreData[i].id,
+			player:scoreData[i].player,
+			total_tps:(scoreData[i].rnd1_pts || 0)+(scoreData[i].rnd2_pts || 0)+(scoreData[i].rnd3_pts || 0),
+			total_vp:(scoreData[i].rnd1_vp || 0)+(scoreData[i].rnd2_vp || 0)+(scoreData[i].rnd3_vp || 0)
+		});
+	};
+	scoreTable.updateOrAddData(update_scoreTable);
+
+	// Skill Estimator
+
+	// Need to identify subgraphs and of those the minimum, which then uplifts the whole subgraph for the same translation
+	let subs = subgraphs(matchTable.getData());
+	update_scoreTable = [];
+
+	// Value Iteration solution
+	// For each subgraph, do value iteration
+	for (s of subs) {
+		// If only one player in the subgraph then just set its skill to 0.
+		if (s.length == 1) {
+			update_scoreTable.push({
+				id:s[0],
+				skill:0
+			});
+			continue;
+		};
+
+		// Get skill estimates within subgraph
+		skill_dict = value_iteration(s, skill_graph);
+
+		// Normalize within subgraph
+		let lowest = 0 - Math.min.apply(null, s.map(x => skill_dict[x]));
+		for (p of s) {
+			update_scoreTable.push({
+				id:p,
+				skill:(skill_dict[p] + lowest).toFixed(3) // it approximates and hence about 0.002 difference per rerun
+			});
+		};
+	};
+	scoreTable.updateOrAddData(update_scoreTable);
+
+	// Sort
+	scoreTable.setSort([
+		{column:"total_vp", dir:"desc"}, //sort by this first
+		{column:"skill", dir:"desc"}, //then sort by this second
+		{column:"total_tps", dir:"desc"}, //then sort by this third
+	]);
+	// Rank
+	scoreData = scoreTable.getData('active'); // use as the way it is sorted
+	update_scoreTable = [];
+	let ranker = 1;
+	for (let i = 0; i < scoreData.length; i++) {
+		if (playerTable.getData().filter(r => r.id == scoreData[i].id)[0].present == true) {
+			update_scoreTable.push({
+				id:scoreData[i].id,
+				rank:ranker
+			});
+			ranker++;
+		} else {
+			update_scoreTable.push({
+				id:scoreData[i].id,
+				rank:'999 EXIT',
+				total_tps:0 // added to make sure it comes at bottom
+			});
+		};
+	};
+	scoreTable.updateOrAddData(update_scoreTable);
+	// Make sure it is sorted properly, with EXITs at bottom
+	scoreTable.setSort([
+		{column:"total_vp", dir:"desc"}, //sort by this first
+		{column:"skill", dir:"desc"}, //then sort by this second
+		{column:"total_tps", dir:"desc"}, //then sort by this third
+	]);
+	scoreTable.redraw();
+};
+
+function pid2Rank(pid) {
+	return scoreTable.getData().filter(row => row.id == pid)[0].rank;
+};
+
+// for testing purposes:
+function getRndInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) ) + min;
+};
+
+// Add players to match table for new round
+function players2Match(current_round) {
+	// current_round is the to be added round
+	let playerList = getActivePlayers();
+	let num_leftover_players = playerList.length % 4;
+	let num_tables = Math.ceil(playerList.length / 4);
+	let num_complete_tables = Math.max(0,num_tables - Math.abs((4-num_leftover_players) % 4));
+	if (current_round == 0 || current_round === undefined || current_round == false) {
+		window.alert('Incorrect usage players2Match');
+	} else if (current_round > 3) {
+		console.log("Game has a limit of 3 rounds");
+	} else if (current_round == 1) {
+		// Assign round 1
+		// Just shuffle and assign randomly
+		shuffle(playerList);
+		let onTable = 0;
+		let current_table = 1;
+		let current_pid = -1;
+		let update_matchData = [];
+		while (playerList.length > 0) {
+			current_pid = playerList.pop();
+			update_matchData.push({
+				"id": matchrowid, "round": current_round, "table": current_table,
+				"player": retrievePlayer4ID(current_pid), "playerid":current_pid,
+				"corp": 'Unknown'
+				//"vp": getRndInteger(40,100) // TEST***
+			});
+			matchrowid++;
+			onTable++;
+			if ( (current_table <= num_complete_tables && onTable == 4) || (current_table > num_complete_tables && onTable == 3) ) {
+				onTable = 0;
+				current_table++;
+			};
+		};
+		matchTable.addData(update_matchData);
+	} else if (current_round <= 3) {
+		// Assign rounds 2 and 3
+		// In order to have all players connected by round 3, we check if there is a solution
+		let attempts = 5;
+		let update_matchData = [];
+		while (attempts > 0) {
+			update_matchData = [];
+			// 0. Rank players
+			updateScoreTable(); // this is required to rank players in pid2Rank
+			// 1. Identify subgraphs
+			let subs = subgraphs(matchTable.getData());
+			// 2. Rank within each subgraph
+			for (let s of subs) {
+				s.sort(function (r1, r2) {
+					if (pid2Rank(r1) > pid2Rank(r2)) return -1;
+					if (pid2Rank(r1) < pid2Rank(r2)) return 1;
+				});
+			};
+			// 3. Mix among subgraphs, popping first for each subgraph
+			let onTable = 0;
+			let current_table = 1;
+			let current_pid = -1;
+			shuffle(subs);
+			while (subs.length > 0) {
+				for (let s of subs) {
+					current_pid = s.pop(); // subgraphs can contain playerids of those that are no longer active.
+					if (playerList.includes(current_pid)) {
+						update_matchData.push({
+							"id": matchrowid, "round": current_round, "table": current_table,
+							"player": retrievePlayer4ID(current_pid), "playerid":current_pid,
+							"corp": 'Unknown'
+							//"vp": getRndInteger(40,100) // TEST***
+						});
+						matchrowid++;
+						onTable++;
+						if ( (current_table <= num_complete_tables && onTable == 4) || (current_table > num_complete_tables && onTable == 3) ) {
+							onTable = 0;
+							current_table++;
+						};
+					}
+				};
+				// There is a possiblity that people get into the same group; possibly reshuffle till none are in the same, but this is unlikely for some subgraphs
+				shuffle(subs);
+				subs = subs.filter(s => s.length > 0);
+			};
+			// Check if solution found that connects all players
+			attempts--;
+			//break;
+			if ( current_round == 2 || subgraphs(matchTable.getData().concat(update_matchData)).length == 1 ) {
+				//matchTable.addData(update_matchData);
+				break;
+			} else {
+				console.log('no solution found, at attempt ', attempts);
+			};
+		};
+		matchTable.addData(update_matchData);
+		// FUTURE 4. if not enough other subgraphs, pick within own subgraph, preference for players that have not been played yet, then if no choice pick which has closest rank
+	};
+	matchTable.setSort([
+		{column:"table", dir:"asc"}, //sort by this first
+		{column:"round", dir:"asc"}, //then sort by this second
+	]);
+	matchTable.redraw();
+};
+
+// Create a new round
+$("#start-new-round").on("click", function(){
+	// check which round we are already in
+	// if at start, then populate
+	// if at any round, then check if all values are entered, and all names in player list exist in round
+	let current_round = fncRound();
+	console.log("current round "+current_round);
+	let playerList = getActivePlayers();
+	if (current_round == 0 && playerList.length > 2) {
+		//shuffle(playerList);
+		console.log('Start tournament, first round:');
+		console.log(playerList);
+		console.log("within current round code "+current_round);
+		// Add Players to Round 1
+		players2Match(1);
+		// Update round indicator
+		$("#round-indicator").text(fncRound());
+	} else if (current_round < 3 && playerList.length > 2) {
+		let matchData = matchTable.getData();
+		let matchPlayers = Array.from(matchData, v => v["playerid"]);
+
+		// Missing players not working correctly it seems. Not check if player is active or not, and when starting new round then the match should have added for that round rather
+		/*
+		// Check if any new players were added that were not assigned any table, warn about them, and add to tournament
+		let missing_players = $.grep(playerList, function(el){return $.inArray(el, matchPlayers) == -1});
+		let missing_players_names = missing_players.map(pid => retrievePlayer4ID(pid));
+		if (missing_players.length > 0) {
+			if (missing_players_names.length > 1) {
+				window.alert('New players were not assigned any tables: '+missing_players_names.slice(0, missing_players_names.length - 1).join(', ') + ", and " + missing_players_names.slice(-1));
+			} else if (missing_players_names.length == 1) {
+				window.alert('New player was not assigned any tables: '+missing_players_names.slice(0));
+			};
+			// Add missing players
+			for (i = current_round; i > 0; i--) {
+				for (let missed_player of missing_players) {
+					console.log('yep');
+					matchTable.addRow({"id":matchrowid, "round": i, "playerid":missed_player, "player":retrievePlayer4ID(missed_player)});
+					matchrowid++;
+				};
+			};
+			return;
+		};
+		*/
+		// Missing scores table
+		if (matchData.some(element => element['vp'] === null || element['vp'] === undefined || !Number.isInteger(element['vp']))) {
+			window.alert('Not all VPs have been entered for this round!');
+			return;
+		};
+		// Missing table IDs
+		if (matchData.some(element => element['table'] === null || element['table'] === undefined || !Number.isInteger(element['table']))) {
+			window.alert('Not all Players have correct Tables!');
+			return;
+		};
+		// Incorrect number of players per table
+		for (i = current_round; i > 0; i--) {
+			let uniqueTables = Array.from(new Set(Array.from(matchData.filter(row => row.round == i), v=>v['table'])));
+			console.log(uniqueTables);
+			for (let table of uniqueTables) {
+				let foundRows = matchData.filter(row => row.round == i && row.table == table);
+				if (foundRows.length > 4) {
+					if (!confirm('Table '+table+' in Round '+i+' has more than 4 players! Is this correct?')) {
+						window.alert('Please change Table '+table+' in Round '+i);
+						return;
+					};
+				} else if (foundRows.length < 3) {
+					if (!confirm('Table '+table+' in Round '+i+' has less than 3 players! Is this correct?')) {
+						window.alert('Please change Table '+table+' in Round '+i);
+						return;
+					};
+				};
+			};
+		};
+		// No players missing & all scores entered:
+		players2Match(current_round + 1);
+		// Update round indicator
+		$("#round-indicator").text(fncRound());
+	} else if (playerList.length < 3) {
+		window.alert("Insufficient players were found. Please make sure all players are present.");
+	} else if (current_round >= 3) {
+		console.log(current_round);
+		window.alert("Already at last round 3. Tournament has finished.");
+	};
+
+});
+
+function decide_round(v) {
+	switch(v) { case 1: return 'rnd1'; break; case 2: return 'rnd2'; break; case 3: return 'rnd3'; break; };
+};
+
+function updateCorpTable() {
+	let matchData = matchTable.getData();
+	let updateCorpDict = {};
+	for (r of matchData) {
+		if (!updateCorpDict[r.corp]) {
+			updateCorpDict[r.corp] = {};
+		};
+		updateCorpDict[r.corp]['corp'] = r.corp;
+		updateCorpDict[r.corp][decide_round(r.round) + '_picked'] = (updateCorpDict[r.corp][decide_round(r.round) + '_picked'] || 0) + 1; // add picked count
+		updateCorpDict[r.corp]['rank_'+r.rank] = (updateCorpDict[r.corp]['rank_'+r.rank] || 0) + 1; // add rank count
+	};
+	let updateCorpArray = [];
+	// Update aggregates and fill zeros
+	for ( [corp, record] of Object.entries(updateCorpDict) ) {
+		record['rnd1_picked'] = record['rnd1_picked'] || 0;
+		record['rnd2_picked'] = record['rnd2_picked'] || 0;
+		record['rnd3_picked'] = record['rnd3_picked'] || 0;
+		record['rank_1'] = record['rank_1'] || 0;
+		record['rank_2'] = record['rank_2'] || 0;
+		record['rank_3'] = record['rank_3'] || 0;
+		record['rank_4'] = record['rank_4'] || 0;
+		record['total_picked'] = record['rnd1_picked'] + record['rnd2_picked'] + record['rnd3_picked'];
+		//updateCorpTable[corp]['avg_rank'] = (record['rank_1'] || 0) +
+		record['avg_rank'] = (( 1*record['rank_1'] + 2*record['rank_2'] + 3*record['rank_3'] + 4*record['rank_4'] ) / record['total_picked']).toFixed(2);
+		updateCorpArray.push(record);
+	};
+	corpTable.updateOrAddData(updateCorpArray);
+
+	// Calculate Skill:
+	let skill_graph = {}; // VI Skill
+	for (i = 1; i <= 3; i++) {
+		let uniqueTables = Array.from(new Set(Array.from(matchData.filter(row => row.round == i), v=>v['table'])));
+		for (let table of uniqueTables) {
+			let foundRows = matchData.filter(row => row.round == i && row.table == table);
+			// Value Iteration differences
+			for (let p = 0; p < foundRows.length; p++) {
+				for (let o = 0; o < foundRows.length; o++) {
+					if (p!=o && foundRows[p].corp != 'Unknown' && foundRows[o].corp != 'Unknown') {
+						if (skill_graph[foundRows[p].corp]) {
+							if (skill_graph[foundRows[p].corp][foundRows[o].corp]) {
+								// if already a matchup, then add to the list
+								skill_graph[foundRows[p].corp][foundRows[o].corp].push(foundRows[p].vp - foundRows[o].vp);
+							} else {
+								// if no matchup yet then add
+								skill_graph[foundRows[p].corp][foundRows[o].corp] = [foundRows[p].vp - foundRows[o].vp];
+							};
+						} else {
+							// does not yet exist, therefore create
+							skill_graph[foundRows[p].corp] = {};
+							skill_graph[foundRows[p].corp][foundRows[o].corp] = [foundRows[p].vp - foundRows[o].vp];
+							// doesnt work for some reason hence in two steps skill_graph[foundRows[p].corp] = { foundRows[o].corp : [foundRows[p].vp - foundRows[o].vp] };
+						};
+					};
+				};
+			};
+		};
+	};
+	console.log(skill_graph);
+
+	updateCorpArray = [];
+	// Value Iteration solution	(just do all at once rather than per subgraph)
+
+	// Value iteration
+	skill_dict = value_iteration(Object.keys(skill_graph), skill_graph); // for corps all in one go
+	// Normalize within sub
+	let lowest = 0 - Math.min.apply(null, Object.keys(skill_dict).map(x => skill_dict[x]));
+	for (c of Object.keys(skill_dict)) {
+		updateCorpArray.push({
+			corp:c,
+			corp_skill:(skill_dict[c] + lowest).toFixed(3) // it approximates and hence about 0.002 difference
+		});
+	};
+	corpTable.updateOrAddData(updateCorpArray);
+
+};
+
+</script>
+</body>
+</html>

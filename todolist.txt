@@ -1,0 +1,22 @@
+TODO
+
+1. Playernumber
+	- index: add to index playernumber in matches
+	- index: add playernumber mention when search
+	O index: search on playernumber?
+	- admin: connect google sheets scores to tabulator
+2. Table assignment
+	- first on VP then continue on
+		partitions of [vps] across all players, then randomize partitions, draw players with priority: didnt play against - different subgraph
+	- actual check if not the same seen before->skip if seen to next
+	- actual try multiple randoms and score for mismatches
+	- language..?
+3. Tabulator
+	- keep in cache/memory
+	- auto update ctive players
+
+X. Registration present
+	use this as start for playertab?
+Y. Google sheets scores:
+	deduplication
+	check duplicate numbers
