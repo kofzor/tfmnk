@@ -18,6 +18,7 @@
 <ul id="tabPane" role="tablist" class="nav nav-tabs">
 	<li class="nav-item active"><a data-toggle="tab" href="#playerTabPane" role="tab" class="nav-link active playerTab">Player</a></li>
 	<li class="nav-item"><a data-toggle="tab" href="#matchTabPane" role="tab" class="nav-link matchTab">Match</a></li>
+	<li class="nav-item"><a data-toggle="tab" href="#googleResultTabPane" role="tab" class="nav-link googleResultTab">GoogleResult</a></li>
 	<li class="nav-item"><a data-toggle="tab" href="#scoreTabPane" role="tab" class="nav-link scoreTab">Score</a></li>
 	<li class="nav-item"><a data-toggle="tab" href="#corpTabPane" role="tab" class="nav-link corpTab">Corps</a></li>
 	<!--<li class="nav-item"><a data-toggle="tab" href="#raffleTabPane" role="tab" class="nav-link raffleTab">Raffle</a></li>-->
@@ -54,6 +55,7 @@
 			<button id="add-match-row">Add Row</button>
 			<button id="del-match-row">Delete Rows</button>
 			<!--<button id="download-match-csv">Download CSV</button>-->
+			<button id="filter-errors">Filter Errors</button>
 			<button id="download-match-json">Download JSON</button>
 			<button id="load-match-json">Load JSON</button>
 			<span id="history-msg" style="margin-left:10px; font-weight:bold;"></span>
@@ -61,6 +63,22 @@
 		</br>
 		<div id="match-table"></div>
 	</div>
+	
+	
+	<div role="tabpanel" id="googleResultTabPane" class="tab-pane">
+		Autoloads columns, make sure code is up to date with columns
+		<div class="table-controls">
+			<button id="load-result-csv">Load CSV</button>
+			<button id="load-result-json">Load JSON</button>
+			<button id="download-result-json">Save JSON</button>
+			<button id="del-result-row">Delete row</button>
+			<button id="merge-into-match">DANGER! Merge into Match</button>
+			<span id="history-msg" style="margin-left:10px; font-weight:bold;"></span>
+		</div>
+		</br>
+		<div id="googleresult-table"></div>
+	</div>
+	
 
 	<div role="tabpanel" id="scoreTabPane" class="tab-pane">
 		<div class="table-controls">
@@ -118,8 +136,7 @@ var rank_scores = [3,3,2,1,0,0,0,0]; // corresponding to rank 1,2,3,4,5,6 (in ca
 var MAX_ATTEMPTS_ASSIGNTABLES = 100; // how many attempts it makes at making  a suitable table assignment for a round
 
 // PLAYER SETUP
-//var init_players_tournament = [{"player":"Alper Soylemez","paid":true},{"player":"Arnaud van der Ploeg","paid":true},{"player":"Arnold van der Veen","paid":true},{"player":"Bart Schelfaut","paid":true},{"player":"Bas Meijerman","paid":true},{"player":"Ben Haanstra","paid":true},{"player":"Binne Heida","paid":true},{"player":"Camilla Dos Santos","paid":true},{"player":"Chris van der Velden","paid":true},{"player":"Christoph Janietz"},{"player":"Daniel Swaab","paid":true},{"player":"Diewertje Eitjes","paid":true},{"player":"Dwayne Holmes","paid":true},{"player":"Erik Roelofs","paid":true}];
-// //,{"player":"Erina Daberdini","paid":true},{"player":"Eva van der Weerd","paid":true},{"player":"Floris van der Veen","paid":true},{"player":"Floyd van den Nieuwenhof","paid":true},{"player":"Frank de Jong","paid":true},{"player":"Gian Franco Casula","paid":true},{"player":"Hans Heijne Makkreel","paid":true},{"player":"Harm Derks","paid":true},{"player":"Henderikus de Jong","paid":true},{"player":"Hugo Ward","paid":true},{"player":"Hristo Georgiev","paid":true},{"player":"Jacqueline Zuidema","paid":true},{"player":"Janis Bader","paid":true},{"player":"Jelle Lauwers","paid":true},{"player":"Jennifer Brouwer","paid":true},{"player":"Jeroen Geenen","paid":true},{"player":"Johnny van Doorn","paid":true},{"player":"Joris Paardekoper","paid":true},{"player":"Jos Hoefnagel","paid":true},{"player":"Jurek Bader","paid":true},{"player":"Kim van Kruijsbergen","paid":true},{"player":"Kyriakos Avgoustis","paid":true},{"player":"Lars Scheepers","paid":true},{"player":"Lindsey Wray","paid":true},{"player":"Marcel Wapstra","paid":true},{"player":"Marco Marsili","paid":true},{"player":"Margriet Benning","paid":true},{"player":"Marije Kraaijeveld","paid":true},{"player":"Marijn Lybeart","paid":true},{"player":"Marion Veldkamp","paid":true},{"player":"Mark Rood","paid":true},{"player":"Marleen de Bot","paid":true},{"player":"Marrick Huisma","paid":true},{"player":"Martin van der Heyden","paid":true},{"player":"Martin van Mersbergen","paid":true},{"player":"Melinda Schuurmans","paid":true},{"player":"Natasja Sluijk","paid":true},{"player":"Nathan Gotlib","paid":true},{"player":"Nico Geurts","paid":true},{"player":"Nina Henken","paid":true},{"player":"Olaf Weijers","paid":true},{"player":"Patrick Schluter","paid":true},{"player":"Paul Peek","paid":true},{"player":"Peter Havik","paid":true},{"player":"Peter Henken","paid":true},{"player":"Ralph Dambacher","paid":true},{"player":"Regina van Mersbergen","paid":true},{"player":"Rens Groenewoud","paid":true},{"player":"Rijk Groenewoud","paid":true},{"player":"Rome van Grinsven","paid":true},{"player":"Ronald Koopman","paid":true},{"player":"Ruud Cremers","paid":true},{"player":"Sake Blok","paid":true},{"player":"Simon Buijs","paid":true},{"player":"Steve Bruck","paid":true},{"player":"Steve Hatto","paid":true},{"player":"Susan Brommer","paid":true},{"player":"Tim Sauer","paid":true},{"player":"Tomas Jakubis","paid":true},{"player":"Tonatiuh Belderbos","paid":true},{"player":"Yvonne Dijkstra","paid":true},{"player":"Yoep Minnaard", "paid":true},{"player":"Zep Harrevelt","paid":true}]
+//var init_players_tournament = []
 //var init_players = [];
 // for (i in init_players_tournament) {
 //	//init_players.push({"id":parseInt(i), "player":init_players_tournament[i].player, "present":true, "paid":init_players_tournament[i].paid || false});
@@ -384,6 +401,74 @@ $("button#load-match-json").click(function(){
 $("button#history-undo").on("click", function(){ matchTable.undo(); });
 //redo button
 $("button#history-redo").on("click", function(){ matchTable.redo(); });
+//Filter errors
+$("button#filter-errors").click(function(){
+	let filters = matchTable.getFilters();
+	if (filters.length == 0) {
+		//matchTable.setFilter("vp", "in", ["check vp+rank", "", null]);
+		matchTable.setFilter(function (data) {
+		  return (
+			data.vp === "check vp+rank" ||
+			data.vp === "" ||
+			data.vp === null ||
+			typeof data.vp === "undefined"
+		  );
+		});
+		document.getElementById('filter-errors').innerText = "Clear Filter";
+	}	else {
+		matchTable.clearFilter();
+		document.getElementById('filter-errors').innerText = "Filter Errors";
+	};
+});
+
+// Google Result Tab
+function cleanUpColumnName(columnName) {
+    return columnName.replace(/\(.*\)/, '').trim();
+};
+var googleResultTable = new Tabulator("#googleresult-table", {
+	layout:"fitData",
+	autoColumns:true,
+	autoColumnsDefinitions:function(definitions){
+        definitions.forEach((column) => {
+			// column.title = cleanUpColumnName(column.title); // ( ) contains corporation etc
+            column.editor = true; // add header filter to every column
+        });
+        return definitions;
+    },
+	history:true,
+	downloadRowRange:"all",
+	persistenceID:"googleresulttable1",
+	persistence: true,
+	editor:true,
+	selectable: 1, // 1 means max 1 can be selected at a time
+});
+
+
+// Load google result csv/json
+$("button#load-result-csv").click(function(){
+	googleResultTable.import("csv", ".csv");
+	googleResultTable.redraw();
+});
+$("button#load-result-json").click(function(){
+	googleResultTable.import("json", ".json");
+	googleResultTable.redraw();
+});
+// Download google result as JSON (e.g. after editing)
+$("button#download-result-json").click(function(){
+	googleResultTable.download("json", "matchData "+Date().toLocaleString().replace(/(:|GMT.*)/gm, '')+".json");
+});
+$("button#del-result-row").click(function(){
+	var selectedRows = googleResultTable.getSelectedRows();
+	for(var i=0;i<selectedRows.length;i++) { selectedRows[i].delete(); }
+});
+// Merge the google result into match, any error is marked accordingly
+$("button#merge-into-match").click(function(){
+	// Download match premerge
+	matchTable.download("json", "matchData "+Date().toLocaleString().replace(/(:|GMT.*)/gm, '')+"PREMERGE.json");
+	mergeGoogleResultIntoMatch();
+	console.log("Finished merge");
+});
+
 
 
 // SCORE TAB
@@ -808,7 +893,8 @@ function pid2Rank(pid) {
 	return scoreTable.getData().filter(row => row.id == pid)[0].rank;
 };
 function pid2TP(pid) {
-	return scoreTable.getData().filter(row => row.id == pid)[0].total_tps;
+	let row = scoreTable.getData().find(row => row.id === pid);
+	return row ? row.total_tps : 0; // if no scores then 0
 };
 
 // for testing purposes:
@@ -826,7 +912,7 @@ function players2Match(current_round) {
 	if (current_round == 0 || current_round === undefined || current_round == false) {
 		window.alert('Incorrect usage players2Match');
 	} else if (current_round > TOURNAMENT_MAX_ROUNDS) {
-		console.log("Game has a limit of 3 rounds");
+		console.log("Game has a limit of ", TOURNAMENT_MAX_ROUNDS, " rounds");
 	} else if (current_round == 1) {
 		// Assign round 1
 		// Just shuffle and assign randomly
@@ -840,8 +926,8 @@ function players2Match(current_round) {
 			update_matchData.push({
 				"id": matchrowid, "round": current_round, "table": current_table,
 				"player": retrievePlayer4ID(current_pid), "playerid":current_pid,
-				"corp": 'Unknown',
-				"vp": getRndInteger(40,100) // TEST***
+				"corp": 'Unknown'
+				//"vp": getRndInteger(40,100) // TEST***
 			});
 			matchrowid++;
 			onTable++;
@@ -890,8 +976,8 @@ function players2Match(current_round) {
 				this_assignment.push({
 					"id": matchrowid, "round": current_round, "table": current_table,
 					"player": retrievePlayer4ID(pid), "playerid":pid,
-					"corp": 'Unknown',
-					"vp": getRndInteger(40,100) // TEST***
+					"corp": 'Unknown'
+					//"vp": getRndInteger(40,100) // TEST***
 				});
 				thistable.push(pid);
 				matchrowid++;
@@ -1001,6 +1087,7 @@ $("#start-new-round").on("click", function(){
 		players2Match(current_round + 1);
 		// Update round indicator
 		$("#round-indicator").text(fncRound());
+		matchTable.download("json", "matchData "+Date().toLocaleString().replace(/(:|GMT.*)/gm, '')+"AUTO.json");
 	} else if (playerList.length < 3) {
 		window.alert("Insufficient players were found. Please make sure all players are present.");
 	} else if (current_round >= 3) {
@@ -1088,6 +1175,84 @@ function updateCorpTable() {
 	};
 	corpTable.updateOrAddData(updateCorpArray);
 
+};
+
+function mergeGoogleResultIntoMatch() {
+	// Merges googleresult into match Table
+	//let match2GoogleMapping = {
+	//	table: 'Table Number', // Replace with actual column names
+	//	round: 'Round',
+	//};
+	let match2GoogleKeys = ['table','round','playerid'];
+	
+	let rowPlayers = [];
+	let googleResultData = googleResultTable.getData();
+	let matchData = matchTable.getData();
+	// Split each row into different player details
+	let rankmap = {1: 'Winner', 2: '2nd', 3: '3rd', 4: '4th', 5: '5th', 6: '6th'};
+	googleResultData.forEach(function (row) {
+		// winner because different name structure
+		let playerObject = {
+				"rank": 1,
+				"playerid": parseInt(row["Winner (player number, not name)"]),
+				"player": retrievePlayer4ID(parseInt(row["Winner (player number, not name)"])),
+				"vp": parseInt(row["Winner (Victory Points)"]),
+				"corp": row["Winner (corporation played)"],
+				"table": parseInt(row["Table Number (number)"]),
+				"round": parseInt(row["Round (number)"])
+				//"Map": originalData["Map"]
+		};
+		rowPlayers.push(playerObject);
+		// Create objects for 1-4 places (5/6 as precaution)
+		for (let i = 2; i <= 6; i++) {
+			let rankname = rankmap[i];
+			if (!(rankname + " place (player number, not name)" in row) || 
+				row[rankname + " place (player number, not name)"].trim() === "") {
+				break; // no more players
+			}
+			let playerObject = {
+				"rank": i,
+				"playerid": parseInt(row[rankname + " place (player number, not name)"]),
+				"player": retrievePlayer4ID(parseInt(row[rankname + " place (player number, not name)"])),
+				"vp": parseInt(row[rankname + " place (Victory Points)"]),
+				"corp": row[rankname + " place (corporation played)"],
+				"table": parseInt(row["Table Number (number)"]),
+				"round": parseInt(row["Round (number)"])
+				//"Map": row["Map"]
+			};
+			rowPlayers.push(playerObject);
+		}
+	});
+	
+	
+	// Merge data from split google result into matchTable
+	let updateDataArray = [];
+	rowPlayers.forEach(function (row1) {
+		let matchingRow = matchData.find(function (row2) {
+			// Check if the columns specified in the mapping match
+			for (let col of match2GoogleKeys) {
+				if (row2[col] !== row1[col]) {
+					return false;
+				}
+			}
+			return true;
+		});
+		if (matchingRow === undefined) {
+			console.log("Could not find matching row for ", row1);
+		} else if (matchingRow) {
+			// Inherit the matchrowid and then take everything from the split googleresult
+			let updateObject = Object.assign({id:matchingRow['id']}, row1);
+			updateDataArray.push(updateObject);
+		} else {
+			// Handle cases where there's no match in table2
+			// You can decide how to handle these cases
+			console.log("Could not find matching row for ", row1);
+		}
+	});
+	console.log(updateDataArray);
+
+	// Update matchData with the found data
+	matchTable.updateData(updateDataArray);
 };
 
 </script>
