@@ -39,3 +39,9 @@ V 130 players
 	> scoring doesnt include the player? if missing then 0 score?
 V player leaving tournament early
 - can search by name
+
+
+Errors:
+- corpstable doesnt rank correctly? but happened with lots of unknowns
+- when changing plaerid, name changes, but if you do undo, it doesnt change the player name as well. changing pid manually to smth else and back works, but increment/decremenitng doesnt work
+- exit players are not at the end yet

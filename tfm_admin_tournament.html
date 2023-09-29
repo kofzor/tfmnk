@@ -894,7 +894,7 @@ function pid2Rank(pid) {
 };
 function pid2TP(pid) {
 	let row = scoreTable.getData().find(row => row.id === pid);
-	return row ? row.total_tps : 0; // if no scores then 0
+	return row ? row.total_tps ? row.total_tps : 0 : 0; // if no scores then 0, in case we do run scoretables the player is added but tps is still undefined
 };
 
 // for testing purposes:
