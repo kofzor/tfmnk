@@ -1,22 +1,36 @@
 TODO
 
 1. Playernumber
-	- index: add to index playernumber in matches
-	- index: add playernumber mention when search
-	O index: search on playernumber?
-	- admin: connect google sheets scores to tabulator
+	V index: add to index playernumber in matches
+	O index: add playernumber mention when search
+	- admin: connect google sheets scores to tabulator <> playerid -> playername
 2. Table assignment
-	- first on VP then continue on
+	V first on VP then continue on
 		partitions of [vps] across all players, then randomize partitions, draw players with priority: didnt play against - different subgraph
-	- actual check if not the same seen before->skip if seen to next
-	- actual try multiple randoms and score for mismatches
-	- language..?
+	V actual check if not the same seen before->skip if seen to next
+	V actual try multiple randoms and score for mismatches
+	V language..? / friends
 3. Tabulator
-	- keep in cache/memory
-	- auto update ctive players
+	V? keep in cache/memory
+	- auto update ctive players <- what is this?
+4. Score google sheets to json
 
 X. Registration present
 	use this as start for playertab?
 Y. Google sheets scores:
 	deduplication
 	check duplicate numbers
+
+NICETOHAVE
+- Search by playernumber
+- Collapse/Fold all matches
+- Memorize user input
+- reassign a round
+- filter errors on matchtable (e.g. same score what rank?)
+- language / friend checker for assignment
+
+Checklist
+- 130 players
+- adding new player in later round
+- player leaving tournament early
+- can search by name

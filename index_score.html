@@ -19,8 +19,8 @@
 
 
 <ul id="tabPane" role="tablist" class="nav nav-tabs flex-column">
-	<li class="nav-item active"><a data-toggle="tab" href="#matchTabPane" role="tab" class="nav-link active matchTab">Match</a></li>
-	<li class="nav-item"><a data-toggle="tab" href="#scoreTabPane" role="tab" class="nav-link scoreTab">Ranking</a></li>
+	<li class="nav-item"><a data-toggle="tab" href="#matchTabPane" role="tab" class="nav-link matchTab">Match</a></li>
+	<li class="nav-item active"><a data-toggle="tab" href="#scoreTabPane" role="tab" class="nav-link active scoreTab">Ranking</a></li>
 	<li class="nav-item"><a data-toggle="tab" href="#corpTabPane" role="tab" class="nav-link corpTab">Corps</a></li>
 	<li class="nav-item"><a data-toggle="tab" href="#rulesTabPane" role="tab" class="nav-link helpTab">Rules</a></li>
 </ul>
@@ -28,7 +28,7 @@
 </br>
 
 <div class="tab-content">
-	<div role="tabpanel" id="matchTabPane" class="tab-pane active">
+	<div role="tabpanel" id="matchTabPane" class="tab-pane">
 		</br>
 		<b>Search:</b> <input id="filter-player" type="text" placeholder="by Name" onkeyup="matchSearchTable()"> <!-- shows the table with players -->
 		<button id="search-clear">Clear</button>
@@ -36,7 +36,7 @@
 		<div id="match-table"></div>
 	</div>
 
-	<div role="tabpanel" id="scoreTabPane" class="tab-pane">
+	<div role="tabpanel" id="scoreTabPane" class="tab-pane active">
 		</br>
 		<div id="score-table"></div>
 	</div>
@@ -331,7 +331,7 @@ var matchTable = new Tabulator("#match-table", {
 
 function matchSearchTable(){
 	var searched_name = document.getElementById("filter-player").value;
-	if (searched_name != "" && searched_name != "Search Table by Name") {
+	if (searched_name != "" && searched_name != "Search Table by Name" && searched_name.length > 1) {
 		// 1. retrieve round+table of player's rows:
 		//let playerRows = matchTable.getData().filter(row => row.player == name);
 		matchTable.setFilter("player", "like", searched_name);
@@ -359,6 +359,7 @@ function matchSearchTable(){
 
 $("button#search-clear").click(function(){
 	matchTable.clearFilter();
+	matchTable.clearSort();
 });
 
 /*

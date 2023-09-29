@@ -29,17 +29,15 @@
 <div class="tab-content">
 	<div role="tabpanel" id="playerTabPane" class="tab-pane active">
 		<div class="table-controls">
-		<button id="player-history-undo">Undo Edit</button>
-		<button id="player-history-redo">Redo Edit</button>
 		<button id="player-add">Add Player</button>
-		<button id="player-del">Remove Player</button>
 		<button id="download-player-json">Download JSON</button>
 		<button id="load-player-json">Load JSON</button>
+		<button id="load-player-csv">Load CSV</button>
 		<button id="player-check">Check Player</button>
 		</div>
 		</br>
 		<div id="player_count">Total Players:</div> <!-- includes inactive players -->
-		<div id="active_count">Active Players:</div> <!-- includes inactive players -->
+		<div id="active_count">Active Players:</div>
 		</br>
 		<div id="player-table"></div>
 	</div>
@@ -114,77 +112,106 @@
 <script type="text/javascript">
 
 // TOURNAMENT Setup
-var rank_scores = [3,3,2,1,0,0,0,0]; // corresponding to rank 1,2,3,4,5,6 (in case that somehow 5th/6th player happened to join the same table. Starts from rank 1 so skip first value
+// tournament variables
+var TOURNAMENT_MAX_ROUNDS = 3; // how many rounds we play
+var rank_scores = [3,3,2,1,0,0,0,0]; // corresponding to rank 1,2,3,4,5,6 (in case that somehow 5th/6th player happened to join the same table. Starts from rank 1 so skips first value as dummy (=3)
+var MAX_ATTEMPTS_ASSIGNTABLES = 100; // how many attempts it makes at making  a suitable table assignment for a round
 
 // PLAYER SETUP
 //var init_players_tournament = [{"player":"Alper Soylemez","paid":true},{"player":"Arnaud van der Ploeg","paid":true},{"player":"Arnold van der Veen","paid":true},{"player":"Bart Schelfaut","paid":true},{"player":"Bas Meijerman","paid":true},{"player":"Ben Haanstra","paid":true},{"player":"Binne Heida","paid":true},{"player":"Camilla Dos Santos","paid":true},{"player":"Chris van der Velden","paid":true},{"player":"Christoph Janietz"},{"player":"Daniel Swaab","paid":true},{"player":"Diewertje Eitjes","paid":true},{"player":"Dwayne Holmes","paid":true},{"player":"Erik Roelofs","paid":true}];
 // //,{"player":"Erina Daberdini","paid":true},{"player":"Eva van der Weerd","paid":true},{"player":"Floris van der Veen","paid":true},{"player":"Floyd van den Nieuwenhof","paid":true},{"player":"Frank de Jong","paid":true},{"player":"Gian Franco Casula","paid":true},{"player":"Hans Heijne Makkreel","paid":true},{"player":"Harm Derks","paid":true},{"player":"Henderikus de Jong","paid":true},{"player":"Hugo Ward","paid":true},{"player":"Hristo Georgiev","paid":true},{"player":"Jacqueline Zuidema","paid":true},{"player":"Janis Bader","paid":true},{"player":"Jelle Lauwers","paid":true},{"player":"Jennifer Brouwer","paid":true},{"player":"Jeroen Geenen","paid":true},{"player":"Johnny van Doorn","paid":true},{"player":"Joris Paardekoper","paid":true},{"player":"Jos Hoefnagel","paid":true},{"player":"Jurek Bader","paid":true},{"player":"Kim van Kruijsbergen","paid":true},{"player":"Kyriakos Avgoustis","paid":true},{"player":"Lars Scheepers","paid":true},{"player":"Lindsey Wray","paid":true},{"player":"Marcel Wapstra","paid":true},{"player":"Marco Marsili","paid":true},{"player":"Margriet Benning","paid":true},{"player":"Marije Kraaijeveld","paid":true},{"player":"Marijn Lybeart","paid":true},{"player":"Marion Veldkamp","paid":true},{"player":"Mark Rood","paid":true},{"player":"Marleen de Bot","paid":true},{"player":"Marrick Huisma","paid":true},{"player":"Martin van der Heyden","paid":true},{"player":"Martin van Mersbergen","paid":true},{"player":"Melinda Schuurmans","paid":true},{"player":"Natasja Sluijk","paid":true},{"player":"Nathan Gotlib","paid":true},{"player":"Nico Geurts","paid":true},{"player":"Nina Henken","paid":true},{"player":"Olaf Weijers","paid":true},{"player":"Patrick Schluter","paid":true},{"player":"Paul Peek","paid":true},{"player":"Peter Havik","paid":true},{"player":"Peter Henken","paid":true},{"player":"Ralph Dambacher","paid":true},{"player":"Regina van Mersbergen","paid":true},{"player":"Rens Groenewoud","paid":true},{"player":"Rijk Groenewoud","paid":true},{"player":"Rome van Grinsven","paid":true},{"player":"Ronald Koopman","paid":true},{"player":"Ruud Cremers","paid":true},{"player":"Sake Blok","paid":true},{"player":"Simon Buijs","paid":true},{"player":"Steve Bruck","paid":true},{"player":"Steve Hatto","paid":true},{"player":"Susan Brommer","paid":true},{"player":"Tim Sauer","paid":true},{"player":"Tomas Jakubis","paid":true},{"player":"Tonatiuh Belderbos","paid":true},{"player":"Yvonne Dijkstra","paid":true},{"player":"Yoep Minnaard", "paid":true},{"player":"Zep Harrevelt","paid":true}]
-
-//BK20230225 var init_players_tournament = ["Tona Belderbos","Tim Kreuk","Arnaud van der Ploeg","Diewertje Eitjes","Nick van Staalduinen","Qing Li","Marina Kooistra","Floyd van den Nieuwenhof","Gian Franco Casula","Marco Marsili","Kris Vanhaverbeke","Laura Pinilla","Ben Haanstra","Wim Vanrie","Frank de Jong","Minh Tran","Manu Dremiere","Bas Meijerman","Élisabeth Mounier","Stijn Peeters","Brecht Demeyer","Pierre-André Zimmermann","Anne Isidor - Zimmerman","Paul van Eekelen","Geoffrey Milleville","Roussel Pierre François","Thomas Keerle","Nora Bourouis","Christophe Eloy","Dominique Simonis","Cedric Jamoul","Arnaud Dumont","Achraf Mahti","Céline Debeusscher","Robin Courtiat","Harold Toutain","Thomas Courgeau","Charlotte Belh","David Gregoire","Natacha Gregoir","Grégory Lavalle","William Turner","Melissa Delva","Leon star","Max van Mulken","Leo van Schooten","Liselot Wyffels","Bart Van Quathem","Robin Reynaert","Karel Pans","Laurens Van de Perre","Wolf Dehulster","Marijn Lybaert","Inez Wester","Camiel Maseland","Mart Hagedoorn","Stijn Van Goethen","Diederik van der Heijden","Wim Waelkens","Tine De Brabander","Dimi Rosselle","Sander De Canck","Thomas Laisnez","Toni Ikonen","Tatu Ikonen","Paul De Smet","Christophe Fockedey","Thomas Vigneron","Thomas vanhulle","Christophe Gregoir","Jelle Lauwers","Simon Declerck","Adriaan Kyndt","Evie Hoeijmakers","Koen De Raad"];
-//Leon Star 20230611
-var init_players_tournament = ['Leon','Olaf','Diederik'];
-
-var init_players = [];
- for (i in init_players_tournament) {
-	//init_players.push({"id":parseInt(i), "player":init_players_tournament[i].player, "present":true, "paid":init_players_tournament[i].paid || false});
-	init_players.push({"id":parseInt(i), "player":init_players_tournament[i], "present":false, "paid":true});
-};
-var current_id = init_players.length;
+//var init_players = [];
+// for (i in init_players_tournament) {
+//	//init_players.push({"id":parseInt(i), "player":init_players_tournament[i].player, "present":true, "paid":init_players_tournament[i].paid || false});
+//	init_players.push({"id":parseInt(i), "player":init_players_tournament[i], "present":false, "paid":true});
+//};
+//var highest_playerid = init_players.length;
+var highest_playerid = 0; // initial value
+function addIncrementingIds(row) {
+  if (row.getData().id === undefined) {
+    highest_playerid++;
+    row.getCell("id").setValue(highest_playerid); // Set the ID column value
+  }
+}
 var playerTable = new Tabulator("#player-table", {
 	//data:init_players,
-	ajaxURL:"playerData Leon20230611.json",
-	addRowPos:"top",
+	//ajaxURL:"playerData_NK2023.json", # we load manually
+	//addRowPos:"top",
+	//autoColumns:true, // this doesnt work well as it also overrides my settings // but if you load csv then it should ignore the columns
 	downloadRowRange:"all",
-	persistenceID:"playertable1",
-	persistence: true,
+	//persistenceID:"playertable1",
+	//persistence: true,
 	//reactiveData:true,
 	history:true,
 	selectable:true,
 	layout:"fitDataFill",
     columns:[
-		{title:"ID", field:"id", width:50, editor:true},
+		{title:"ID", field:"id", width:50, editor:"number"},
 		{title:"Player", field:"player", width:200, editor:"input"},
 		{title:"Present", field:"present", width:100, hozAlign:"center", formatter:"tickCross", editor:true},
-		{title:"Paid", field:"paid", width:100, hozAlign:"center", formatter:"tickCross", editor:true},
-		// {title:"Game", field:"game", width:100, editor:"input"},
-    ],
+    ]
 });
-var current_playerid = playerTable.getData().length;
+function rectifyPlayerTable() {
+	// Because loading as CSV can autocolumn integers to string
+	var dataToUpdate = playerTable.getData().map(function (row) {
+	  return {
+		id: parseFloat(row.id) || row.id,
+		player: row.player,
+		present: typeof row.present === 'boolean' ? row.present : row.present.toLowerCase() === "true" ? true : false
+	  };
+	});
+	playerTable.setData(dataToUpdate);
+};
+function getMaxPlayerID() {
+	let data = playerTable.getData();
+	let maxID = 0; // Default to 0
+	data.forEach(function (row) {
+		if (typeof row.id === 'number' && !isNaN(row.id)) {
+		  maxID = Math.max(maxID, row.id);
+		}
+	});
+	return maxID;
+};
+highest_playerid = getMaxPlayerID(); // after initialization
 // Retrieve the name of a player given an ID
 function retrievePlayer4ID(id) {
 	//console.log(id);
 	let playerData = playerTable.getData();
-	return playerData.find(function(el) { return el.id == id }).player;
+	let matchingPlayer = playerData.find(function(el) { return el.id === id });
+	// Return the player's name if found, or an empty string if not found
+	return matchingPlayer ? matchingPlayer.player : '';	
 };
 // Retrieve list of active player IDs
 function getActivePlayers() {
 	return Array.from(playerTable.getData().filter(r => r.present == true), v => v["id"]);
 }
 function updatePlayerCounts() {
-	current_playerid = playerTable.getData().length;
-	$("#player_count").text('Total Players: '+current_playerid);
+	rectifyPlayerTable();
+	highest_playerid = getMaxPlayerID();
+	$("#player_count").text('Total Players: '+highest_playerid);
 	$("#active_count").text('Active Players: '+getActivePlayers().length);
 };
 //Add row on "Add Row" button click //can be improved by reopening the window message
 $("#player-add").click(function(){
-	var newplayer = prompt("Please enter a name", "");
+	updatePlayerCounts();
+	let newplayer = prompt("Please enter a name", "");
 	if (newplayer != null) {
-		var playerList = Array.from(playerTable.getData(), v => v["player"]);
+		let playerList = Array.from(playerTable.getData(), v => v["player"]);
 		if ( !playerList.includes(newplayer) ) {
-			current_playerid++;
-			playerTable.addRow({"player":newplayer, "id":current_playerid});
+			highest_playerid++;
+			playerTable.addRow({"player":newplayer, "id":highest_playerid, "present": true});
 			updatePlayerCounts();
 		} else {
-			window.alert('Player already existing. Change name to differentiate players.');
+			window.alert('Player already exists. Change name to differentiate players.');
 		};
 	};
 });
 //Delete row on "Delete Row" button click TURNED OFF AS PRECAUTION
-$("#player-del").click(function(){
-	var selectedRows = playerTable.getSelectedRows();
-	for(var i=0;i<selectedRows.length;i++) { selectedRows[i].delete(); }
-	updatePlayerCounts();
-});
+//$("#player-del").click(function(){
+//	let selectedRows = playerTable.getSelectedRows();
+//	for(let i=0;i<selectedRows.length;i++) { selectedRows[i].delete(); }
+//	updatePlayerCounts();
+//});
 //Clear table on "Empty the table" button click
 $("#player-clear").click(function(){ playerTable.clearData(); });
 //undo button
@@ -194,7 +221,28 @@ $("#player-history-redo").click(function(){ playerTable.redo(); });
 //trigger download of data.json file
 $("#download-player-json").click(function(){ playerTable.download("json", "playerData "+Date().toLocaleString().replace(/(:|GMT.*)/gm, '')+".json"); });
 //load json file
-$("#load-player-json").click(function(){ playerTable.import("json", ".json"); });
+$("#load-player-json").click(function(){ 
+	playerTable.import("json", ".json")
+		.then(function() {
+            // This code will execute after the import operation is completed
+            updatePlayerCounts();
+        })
+        .catch(function(error) {
+            // Handle any errors that occur during the import
+            console.error("Error importing CSV:", error);
+        });
+});
+$("#load-player-csv").click(function(){ 
+	playerTable.import("csv", ".csv")
+		.then(function() {
+            // This code will execute after the import operation is completed
+            updatePlayerCounts();
+        })
+        .catch(function(error) {
+            // Handle any errors that occur during the import
+            console.error("Error importing CSV:", error);
+        });
+});
 $("#player-check").click(function(){
 	updatePlayerCounts();
 });
@@ -215,7 +263,7 @@ var matchTable = new Tabulator("#match-table", {
 	downloadRowRange:"all",
 	persistenceID:"matchtable1",
 	persistence: true,
-	selectable: true, // ok for admin, remove for users
+	selectable: 1, // 1 means max 1 can be selected at a time
 	groupUpdateOnCellEdit:true,
 	groupBy:["round","table"],
 	groupHeader:[
@@ -228,15 +276,26 @@ var matchTable = new Tabulator("#match-table", {
 	],
     columns:[
 		{rowHandle:true, formatter:"handle", headerSort:false, frozen:true, width:30, minWidth:30},
-		{title:"ID", field:"id", width:80, editor:"number", editorParams:{ min:0,max:999999,step:1}, validator:"integer"},
-		{title:"PlayerID", field:"playerid", width:80, editor:"number", editorParams:{ min:0,max:999,step:1}, validator:"integer"},
-		{title:"Player", field:"player", width:120, editor:true},
-		{title:"VP", field:"vp", width:100, editor:"number", editorParams:{ min:20,max:500,step:1}, validator:"integer", sorter:"number"},
-		{title:"Rank", field:"rank", width:100, editor:"number", editorParams:{ min:1,max:6,step:1}, validator:"integer", sorter:"number"},
-		{title:"Corp", field:"corp", width:90, formatter:"image", formatterParams:{
+		{title:"ID", field:"id", width:60, editor:"number", editorParams:{min:0,max:999999,step:1}, validator:"integer"}, // matchrowid = unique
+		{title:"PlayerID", field:"playerid", width:60, editor:"number", editorParams:{min:0,max:500,step:1}, validator:"integer",
+		cellEdited: function(cell) {
+			// Get the edited player ID value
+			let search_id = cell.getValue();
+			// Get the row data
+			let rowData = cell.getRow().getData();		
+			// Use a function to fetch the player name based on the edited player ID
+			// Replace getPlayerNameById with your actual data retrieval logic
+			let playerName = retrievePlayer4ID(search_id);
+			// Update the "PlayerName" field in the row with the new value
+			cell.getRow().update({ player: playerName});
+		}}, // playerid
+		{title:"Player", field:"player", width:120, editor:false}, // change player by changing playerid
+		{title:"VP", field:"vp", width:80, editor:"number", editorParams:{min:20,max:500,step:1}, validator:"integer", sorter:"number"},
+		{title:"Rank", field:"rank", width:80, editor:"number", editorParams:{min:1,max:6,step:1}, validator:"integer", sorter:"number"},
+		{title:"Corp", field:"corp", width:100, formatter:"image", formatterParams:{
 			height:"30px",
 			width:"80px",
-			//urlPrefix:"www.artificialintelligence.works",
+			urlPrefix:"corps/",
 			urlSuffix:".png"
 			},
 			editor:"list", editorParams:{values:{
@@ -347,7 +406,7 @@ var scoreTable = new Tabulator("#score-table", {
 			columns:[{title:"Table", width:50, field:"rnd1_table", headerSort:false}, {title:"VP", width:50, field:"rnd1_vp", headerSort:false},{title:"TP", width:50, field:"rnd1_pts", headerSort:false}, {title:"Corp", width:90, field:"rnd1_corp", headerSort:false, tooltip:true, formatter:"image", formatterParams:{
 			height:"30px",
 			width:"80px",
-			//urlPrefix:"www.artificialintelligence.works",
+			urlPrefix:"corps/",
 			urlSuffix:".png"
 			},}]
 		},
@@ -355,7 +414,7 @@ var scoreTable = new Tabulator("#score-table", {
 			columns:[{title:"Table", width:50, field:"rnd2_table", headerSort:false}, {title:"VP", width:50, field:"rnd2_vp", headerSort:false},{title:"TP", width:50, field:"rnd2_pts", headerSort:false}, {title:"Corp", width:90, field:"rnd2_corp", headerSort:false, tooltip:true, formatter:"image", formatterParams:{
 			height:"30px",
 			width:"80px",
-			//urlPrefix:"www.artificialintelligence.works",
+			urlPrefix:"corps/",
 			urlSuffix:".png"
 			},}]
 		},
@@ -363,7 +422,7 @@ var scoreTable = new Tabulator("#score-table", {
 			columns:[{title:"Table", width:50, field:"rnd3_table", headerSort:false}, {title:"VP", width:50, field:"rnd3_vp", headerSort:false},{title:"TP", width:50, field:"rnd3_pts", headerSort:false}, {title:"Corp", width:90, field:"rnd3_corp", headerSort:false, tooltip:true, formatter:"image", formatterParams:{
 			height:"30px",
 			width:"80px",
-			//urlPrefix:"www.artificialintelligence.works",
+			urlPrefix:"corps/",
 			urlSuffix:".png"
 			},}]
 		}
@@ -404,7 +463,7 @@ var corpTable = new Tabulator("#corp-table", {
 		{title:"Corp", width:100, field:"corp", tooltip:true, formatter:"image", formatterParams:{
 			height:"30px",
 			width:"80px",
-			//urlPrefix:"www.artificialintelligence.works",
+			urlPrefix:"corps/",
 			urlSuffix:".png"
 			},
 		},
@@ -474,6 +533,14 @@ function difference(setA, setB) {
 function union(setA, setB) {
 	return [...new Set([...setA, ...setB])];
 };
+function intersect(setA, setB) {
+  return setA.filter((element) => setB.includes(element));
+}
+function intersectArr(arrA, arrB) {
+	return arrA.filter(function(n) {
+		return arrB.indexOf(n) > -1;
+	});
+};
 function playersOnTable(rnd, table, data) {
 	return Array.from(data.filter(row => row.round == rnd && row.table == table), v=>v['playerid']);
 };
@@ -483,13 +550,16 @@ function opponentsOfPlayer(pid, data) {
 	for (let r of playerRows) {
 		players = players.concat(playersOnTable(r.round, r.table, data));
 	};
+	players = players.filter(player => player !== pid); // exclude the player itself
 	return Array.from(new Set(players));
 };
 function subgraphs(data) {
-	// Input is a dataset, allowing for the checking of assignment solutions
+	// This approach is an 'after the fact' check rather than keeping tracks as we progress through the tournament, because players may seat a different table than expected.
+	// Input is a matchTable dataset, allowing for the checking of assignment solutions
 	let result = []; // holds subgraphs
+	// Players that we are going to check:
 	//let uniquePlayers = Array.from(new Set(Array.from(data, v=>v['playerid'])));
-	let uniquePlayers = union(Array.from(new Set(Array.from(data, v=>v['playerid']))), getActivePlayers()); // add players that were not in match table
+	let uniquePlayers = union(Array.from(new Set(Array.from(data, v=>v['playerid']))), getActivePlayers()); // include players that are new
 	while (uniquePlayers.length > 0) {
 		let current_player = uniquePlayers.pop();
 		let current_subgraph = new Set([current_player]);
@@ -500,7 +570,8 @@ function subgraphs(data) {
 			// add to current_subgraph
 			current_subgraph = union(current_subgraph, [check]);
 			// delete from uniquePlayers
-			uniquePlayers = Array.from(difference(uniquePlayers, [check]));
+			//uniquePlayers = Array.from(difference(uniquePlayers, [check]));
+			uniquePlayers = uniquePlayers.filter(playerid => playerid !== check);
 			// add opponents of this player to related if they are not yet in current_subgraph, and only those that have not already been in related
 			related = Array.from(union(related, difference(opponentsOfPlayer(check, data), current_subgraph)));
 		};
@@ -508,12 +579,23 @@ function subgraphs(data) {
 	};
 	return result;
 };
+function deepCopyArray(arr) {
+	if (!Array.isArray(arr)) {
+		return arr; // Base case: if the input is not an array, return it as is
+	}
+	let copy = [];
+	for (let i = 0; i < arr.length; i++) {
+		copy[i] = deepCopyArray(arr[i]); // Recursively deep copy each element
+	}
+	return copy;
+}
 
 
 // Value Iteration
 function value_iteration(s, skill_graph) {
 	// Initialize:
 	let skill_dict = {};
+	// player of subgraph
 	for (p of s) {
 		skill_dict[p] = 0;
 	};
@@ -598,6 +680,16 @@ function updateScoreTable() {
 	let update_scoreTable = [];
 	for (let row of matchData) {
 		let i_rnd = row['round'];
+		let roundNumber = `rnd${i_rnd}`;
+		update_scoreTable.push({
+			id: row.playerid,
+			player: row.player,
+			[`${roundNumber}_table`]: parseInt(row.table),
+			[`${roundNumber}_vp`]: parseInt(row.vp),
+			[`${roundNumber}_pts`]: rank_scores[parseInt(row.rank)],
+			[`${roundNumber}_corp`]: row.corp || "Unknown"
+		});
+		/*
 		if (i_rnd == 1) {
 			update_scoreTable.push({
 				id:row.playerid,
@@ -628,6 +720,7 @@ function updateScoreTable() {
 		} else {
 			console.log('error in updating vps and table');
 		};
+		*/
 	};
 	matchTable.redraw();
 	scoreTable.updateOrAddData(update_scoreTable);
@@ -646,13 +739,12 @@ function updateScoreTable() {
 	scoreTable.updateOrAddData(update_scoreTable);
 
 	// Skill Estimator
-
 	// Need to identify subgraphs and of those the minimum, which then uplifts the whole subgraph for the same translation
 	let subs = subgraphs(matchTable.getData());
 	update_scoreTable = [];
 
 	// Value Iteration solution
-	// For each subgraph, do value iteration
+	// For each subgraph, do value iteration (separately)
 	for (s of subs) {
 		// If only one player in the subgraph then just set its skill to 0.
 		if (s.length == 1) {
@@ -715,6 +807,9 @@ function updateScoreTable() {
 function pid2Rank(pid) {
 	return scoreTable.getData().filter(row => row.id == pid)[0].rank;
 };
+function pid2TP(pid) {
+	return scoreTable.getData().filter(row => row.id == pid)[0].total_tps;
+};
 
 // for testing purposes:
 function getRndInteger(min, max) {
@@ -730,7 +825,7 @@ function players2Match(current_round) {
 	let num_complete_tables = Math.max(0,num_tables - Math.abs((4-num_leftover_players) % 4));
 	if (current_round == 0 || current_round === undefined || current_round == false) {
 		window.alert('Incorrect usage players2Match');
-	} else if (current_round > 3) {
+	} else if (current_round > TOURNAMENT_MAX_ROUNDS) {
 		console.log("Game has a limit of 3 rounds");
 	} else if (current_round == 1) {
 		// Assign round 1
@@ -745,8 +840,8 @@ function players2Match(current_round) {
 			update_matchData.push({
 				"id": matchrowid, "round": current_round, "table": current_table,
 				"player": retrievePlayer4ID(current_pid), "playerid":current_pid,
-				"corp": 'Unknown'
-				//"vp": getRndInteger(40,100) // TEST***
+				"corp": 'Unknown',
+				"vp": getRndInteger(40,100) // TEST***
 			});
 			matchrowid++;
 			onTable++;
@@ -756,64 +851,73 @@ function players2Match(current_round) {
 			};
 		};
 		matchTable.addData(update_matchData);
-	} else if (current_round <= 3) {
+	} else { //if (current_round <= TOURNAMENT_MAX_ROUNDS) {
 		// Assign rounds 2 and 3
 		// In order to have all players connected by round 3, we check if there is a solution
-		let attempts = 5;
 		let update_matchData = [];
+		let attempts = MAX_ATTEMPTS_ASSIGNTABLES;
+		let best_assignment = null;
+		let best_score = Infinity;
+		// New Approach: if you take each round players with the most TP, that means you implicitly are mixing the subgraphs
+		// Hence: get TP groups, shuffle within each TR group and then from most TP to lowest, add players, skipping players that were already seen by players in the pool?
+		// 0. Rank players
+		updateScoreTable(); // this is required to rank players in pid2Rank
+		let matchData = matchTable.getData();
+		// 1. Get groups of TPs
+		let grpTPs = Array.from({ length: (current_round - 1)*rank_scores[0] + 1 }, () => []);
+		playerList.forEach((pid) => {
+		  let points = pid2TP(pid);
+		  grpTPs[points].push(pid);
+		});
+		// and reverse, from highest to lowest TP
+		grpTPs.reverse()
+		// 2. Try assignments
 		while (attempts > 0) {
-			update_matchData = [];
-			// 0. Rank players
-			updateScoreTable(); // this is required to rank players in pid2Rank
-			// 1. Identify subgraphs
-			let subs = subgraphs(matchTable.getData());
-			// 2. Rank within each subgraph
-			for (let s of subs) {
-				s.sort(function (r1, r2) {
-					if (pid2Rank(r1) > pid2Rank(r2)) return -1;
-					if (pid2Rank(r1) < pid2Rank(r2)) return 1;
-				});
-			};
-			// 3. Mix among subgraphs, popping first for each subgraph
+			let this_assignment = [];
+			let this_score = 0;
+			// 3. Create a copy of grpTPs
+			let this_copy = deepCopyArray(grpTPs);
+			// 4. Shuffle within each group
+			this_copy.forEach((subarray) => {
+			  shuffle(subarray);
+			});
+			// 5. Assign tables
 			let onTable = 0;
 			let current_table = 1;
-			let current_pid = -1;
-			shuffle(subs);
-			while (subs.length > 0) {
-				for (let s of subs) {
-					current_pid = s.pop(); // subgraphs can contain playerids of those that are no longer active.
-					if (playerList.includes(current_pid)) {
-						update_matchData.push({
-							"id": matchrowid, "round": current_round, "table": current_table,
-							"player": retrievePlayer4ID(current_pid), "playerid":current_pid,
-							"corp": 'Unknown'
-							//"vp": getRndInteger(40,100) // TEST***
-						});
-						matchrowid++;
-						onTable++;
-						if ( (current_table <= num_complete_tables && onTable == 4) || (current_table > num_complete_tables && onTable == 3) ) {
-							onTable = 0;
-							current_table++;
-						};
-					}
+			let playersranked = this_copy.flat(1); // flatten
+			let thistable = [];
+			for (let pid of playersranked) {
+				this_assignment.push({
+					"id": matchrowid, "round": current_round, "table": current_table,
+					"player": retrievePlayer4ID(pid), "playerid":pid,
+					"corp": 'Unknown',
+					"vp": getRndInteger(40,100) // TEST***
+				});
+				thistable.push(pid);
+				matchrowid++;
+				onTable++;
+				// check if pid has seen any of his opponents and penalize for each repeat
+				this_score += intersectArr(opponentsOfPlayer(pid, matchData), thistable).length**2;
+				// check if table is full:
+				if ( (current_table <= num_complete_tables && onTable == 4) || (current_table > num_complete_tables && onTable == 3) ) {
+					onTable = 0;
+					current_table++;
+					thistable = [];
 				};
-				// There is a possiblity that people get into the same group; possibly reshuffle till none are in the same, but this is unlikely for some subgraphs
-				shuffle(subs);
-				subs = subs.filter(s => s.length > 0);
 			};
-			// Check if solution found that connects all players
+			// check if it is better than best assignment
 			attempts--;
-			//break;
-			if ( current_round == 2 || subgraphs(matchTable.getData().concat(update_matchData)).length == 1 ) {
-				//matchTable.addData(update_matchData);
-				break;
-			} else {
-				console.log('no solution found, at attempt ', attempts);
+			if (this_score < best_score) {
+				best_assignment = this_assignment;
+				best_score = this_score;
 			};
-		};
-		matchTable.addData(update_matchData);
-		// FUTURE 4. if not enough other subgraphs, pick within own subgraph, preference for players that have not been played yet, then if no choice pick which has closest rank
-	};
+			if (best_score == 0) {
+				break;
+			};
+		}; // # end while attempts
+		console.log("Best score", best_score);
+		matchTable.addData(best_assignment);
+	}; // future rounds
 	matchTable.setSort([
 		{column:"table", dir:"asc"}, //sort by this first
 		{column:"round", dir:"asc"}, //then sort by this second
