@@ -30,10 +30,14 @@
 <div class="tab-content">
 	<div role="tabpanel" id="matchTabPane" class="tab-pane active">
 		</br>
+		<button id="search-score">Submit Score</button> (Don't forget to submit the scores on paper!)
+		</br>
+		</br>
 		<b>Search:</b> <input id="filter-player" type="text" placeholder="by Name" onkeyup="matchSearchTable()"> <!-- shows the table with players -->
 		<button id="search-clear">Clear</button>
 		</br>
-		<div id="match-table"></div>
+		</br>
+		<div id="match-table"></div>		
 	</div>
 
 	<div role="tabpanel" id="scoreTabPane" class="tab-pane">
@@ -360,6 +364,13 @@ function matchSearchTable(){
 $("button#search-clear").click(function(){
 	matchTable.clearFilter();
 });
+
+$("button#search-score").click(function(){
+	window.open("https://docs.google.com/forms/d/e/1FAIpQLSfslrBwx6TzMQcdIQ8BqllMSxfWExVZckq0ZPWkeNG2Uoj5rA/viewform", "_blank");
+});
+
+
+
 
 /*
 // Testing matches
